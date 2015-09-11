@@ -26,8 +26,6 @@ data Location = Location {
     , _lines     :: Maybe BeginEnd
 }
 
-data Content
-
 data Issue = Issue {
     _type               :: String
   , _check_name         :: String
@@ -35,7 +33,7 @@ data Issue = Issue {
   , _categories         :: [Category]
   , _location           :: Location
   , _remediation_points :: Maybe Int
-  , _content            :: Maybe Content
+  , _content            :: Maybe String
   , _other_locations    :: Maybe [Location]
 }
 

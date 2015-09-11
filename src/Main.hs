@@ -5,11 +5,19 @@ module Main where
 data Location
 data Content
 
+data Category = BugRisk
+              | Clarity
+              | Compatibility
+              | Complexity
+              | Duplication
+              | Security
+              | Style
+
 data Issue = Issue {
     _type               :: String
   , _check_name         :: String
   , _description        :: String
-  , _categories         :: [String]
+  , _categories         :: [Category]
   , _location           :: Location
   , _remediation_points :: Int
   , _content            :: Content

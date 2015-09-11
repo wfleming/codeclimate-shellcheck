@@ -1,7 +1,5 @@
 module Main where
 
--- Types.
-
 data Category = BugRisk
               | Clarity
               | Compatibility
@@ -10,11 +8,6 @@ data Category = BugRisk
               | Security
               | Style
 
-data BeginEnd = BeginEnd {
-    _begin :: Int
-  , _end   :: Int
-}
-
 data LineColumn = LineColumn {
     _line   :: Int
   , _column :: Int
@@ -22,10 +15,15 @@ data LineColumn = LineColumn {
 
 data Position = Coord LineColumn | Offset Int
 
+data BeginEnd = BeginEnd {
+    _begin :: Int
+  , _end   :: Int
+}
+
 data Location = Location {
-      _path  :: FilePath
+      _path      :: FilePath
     , _positions :: Maybe Position
-    , _lines :: Maybe BeginEnd
+    , _lines     :: Maybe BeginEnd
 }
 
 data Content
@@ -36,9 +34,9 @@ data Issue = Issue {
   , _description        :: String
   , _categories         :: [Category]
   , _location           :: Location
-  , _remediation_points :: Int
-  , _content            :: Content
-  , _other_locations    :: [Location]
+  , _remediation_points :: Maybe Int
+  , _content            :: Maybe Content
+  , _other_locations    :: Maybe [Location]
 }
 
 main :: IO ()

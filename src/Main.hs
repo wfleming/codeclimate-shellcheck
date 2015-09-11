@@ -2,9 +2,6 @@ module Main where
 
 -- Types.
 
-data Location
-data Content
-
 data Category = BugRisk
               | Clarity
               | Compatibility
@@ -12,6 +9,18 @@ data Category = BugRisk
               | Duplication
               | Security
               | Style
+
+data Lines = Lines {
+    _begin :: Int
+  , _end   :: Int
+}
+
+data Location = Location {
+    _path  :: FilePath
+  , _lines :: Lines
+}
+
+data Content
 
 data Issue = Issue {
     _type               :: String

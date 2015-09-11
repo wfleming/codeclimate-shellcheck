@@ -10,14 +10,22 @@ data Category = BugRisk
               | Security
               | Style
 
-data Lines = Lines {
+data BeginEnd = BeginEnd {
     _begin :: Int
   , _end   :: Int
 }
 
+data LineColumn = LineColumn {
+    _line   :: Int
+  , _column :: Int
+}
+
+data Position = Coord LineColumn | Offset Int
+
 data Location = Location {
-    _path  :: FilePath
-  , _lines :: Lines
+      _path  :: FilePath
+    , _positions :: Maybe Position
+    , _lines :: Maybe BeginEnd
 }
 
 data Content

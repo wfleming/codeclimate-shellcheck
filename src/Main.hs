@@ -9,6 +9,13 @@ import Data.Aeson.Types (Pair, Value(Null), defaultOptions, fieldLabelModifier)
 import Data.Char        (isUpper, toLower)
 import GHC.Generics     (Generic)
 
+-- Types.
+
+data BeginEnd = BeginEnd {
+    _begin :: Int
+  , _end   :: Int
+} deriving (Generic, Show)
+
 data Category = BugRisk
               | Clarity
               | Compatibility
@@ -17,6 +24,31 @@ data Category = BugRisk
               | Security
               | Style
               deriving Show
+
+data Issue = Issue {
+    _check_name         :: String
+  , _description        :: String
+  , _categories         :: [Category]
+  , _location           :: Location
+  , _remediation_points :: Maybe Int
+  , _content            :: Maybe String
+  , _other_locations    :: Maybe [Location]
+} deriving Show
+
+data LineColumn = LineColumn {
+    _line   :: Int
+  , _column :: Int
+} deriving (Generic, Show)
+
+data Location = Lines FilePath BeginEnd
+              | Positions FilePath Position
+              deriving Show
+
+data Position = Coords LineColumn
+              | Offset Int
+              deriving Show
+
+-- Instances.
 
 instance ToJSON Category where
   toJSON BugRisk       = "bug risk"
@@ -27,51 +59,8 @@ instance ToJSON Category where
   toJSON Security      = "security"
   toJSON Style         = "style"
 
-data BeginEnd = BeginEnd {
-    _begin :: Int
-  , _end   :: Int
-} deriving (Generic, Show)
-
 instance ToJSON BeginEnd where
   toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
-
-data LineColumn = LineColumn {
-    _line   :: Int
-  , _column :: Int
-} deriving (Generic, Show)
-
-instance ToJSON LineColumn where
-  toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
-
-data Position = Coords LineColumn
-              | Offset Int
-              deriving Show
-
-instance ToJSON Position where
-  toJSON (Coords x) = toJSON x
-  toJSON (Offset x) = object [ "offset" .= x ]
-
-data Location = Lines FilePath BeginEnd
-              | Positions FilePath Position
-              deriving Show
-
-instance ToJSON Location where
-  toJSON location = object $ case location of
-    Lines     x y -> [ f x, "lines" .= y ]
-    Positions x y -> [ f x, "positions" .= y ]
-    where
-      f :: FilePath -> Pair
-      f = (.=) "path"
-
-data Issue = Issue {
-    _check_name         :: String
-  , _description        :: String
-  , _categories         :: [Category]
-  , _location           :: Location
-  , _remediation_points :: Maybe Int
-  , _content            :: Maybe String
-  , _other_locations    :: Maybe [Location]
-} deriving (Generic, Show)
 
 instance ToJSON Issue where
   toJSON Issue{..} = object . withoutNulls $ [
@@ -87,6 +76,21 @@ instance ToJSON Issue where
     where
       withoutNulls :: [(a, Value)] -> [(a, Value)]
       withoutNulls = filter (\(_, v) -> v /= Null)
+
+instance ToJSON LineColumn where
+  toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
+
+instance ToJSON Location where
+  toJSON location = object $ case location of
+    Lines     x y -> [ f x, "lines" .= y ]
+    Positions x y -> [ f x, "positions" .= y ]
+    where
+      f :: FilePath -> Pair
+      f = (.=) "path"
+
+instance ToJSON Position where
+  toJSON (Coords x) = toJSON x
+  toJSON (Offset x) = object [ "offset" .= x ]
 
 main :: IO ()
 main = putStrLn "hey"

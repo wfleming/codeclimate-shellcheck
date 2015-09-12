@@ -8,6 +8,11 @@ data Category = BugRisk
               | Security
               | Style
 
+data BeginEnd = BeginEnd {
+    _begin :: Int
+  , _end   :: Int
+}
+
 data LineColumn = LineColumn {
     _line   :: Int
   , _column :: Int
@@ -15,16 +20,8 @@ data LineColumn = LineColumn {
 
 data Position = Coord LineColumn | Offset Int
 
-data BeginEnd = BeginEnd {
-    _begin :: Int
-  , _end   :: Int
-}
-
-data Location = Location {
-      _path      :: FilePath
-    , _positions :: Maybe Position
-    , _lines     :: Maybe BeginEnd
-}
+data Location = Lines FilePath BeginEnd
+              | Positions FilePath Position
 
 data Issue = Issue {
     _type               :: String

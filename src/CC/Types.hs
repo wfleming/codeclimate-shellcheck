@@ -15,8 +15,8 @@ data BeginEnd = Positions Position Position
 
 instance ToJSON BeginEnd where
   toJSON x = object $ case x of
-    Positions b e -> f b e
-    Lines b e     -> f b e
+    Positions begin end -> f begin end
+    Lines     begin end -> f begin end
     where
       f :: (ToJSON a) => a -> a -> [Pair]
       f x y = [ "begin" .= x, "end" .= y ]

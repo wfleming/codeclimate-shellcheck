@@ -4,7 +4,7 @@
 module Main where
 
 import Data.Aeson       (ToJSON(..), (.=), genericToJSON, object)
-import Data.Aeson.Types (defaultOptions, fieldLabelModifier)
+import Data.Aeson.Types (Pair, defaultOptions, fieldLabelModifier)
 import Data.Char        (isUpper, toLower)
 import GHC.Generics     (Generic)
 
@@ -52,6 +52,15 @@ instance ToJSON Position where
 
 data Location = Lines FilePath BeginEnd
               | Positions FilePath Position
+              deriving Show
+
+instance ToJSON Location where
+  toJSON location = object $ case location of
+    Lines     x y -> [ path x, "lines" .= y ]
+    Positions x y -> [ path x, "positions" .= y ]
+    where
+      path :: FilePath -> Pair
+      path x = "path" .= x
 
 data Issue = Issue {
     _type               :: String

@@ -31,7 +31,7 @@ data LineColumn = LineColumn {
 instance ToJSON LineColumn where
   toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
 
--- | PositionBased refer to specific characters within a source file, and can be
+-- | Positions refer to specific characters within a source file, and can be
 -- expressed in two ways.
 data Position = Coords LineColumn
                 -- ^ Line and column coordinates.

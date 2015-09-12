@@ -3,8 +3,10 @@
 
 module Main where
 
-import Data.Aeson (ToJSON(..), (.=), object)
-import Data.Char  (isUpper, toLower)
+import Data.Aeson       (ToJSON(..), genericToJSON)
+import Data.Aeson.Types (defaultOptions, fieldLabelModifier)
+import Data.Char        (isUpper, toLower)
+import GHC.Generics     (Generic)
 
 data Category = BugRisk
               | Clarity
@@ -27,7 +29,10 @@ instance ToJSON Category where
 data BeginEnd = BeginEnd {
     _begin :: Int
   , _end   :: Int
-}
+} deriving (Generic, Show)
+
+instance ToJSON BeginEnd where
+  toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
 
 data LineColumn = LineColumn {
     _line   :: Int

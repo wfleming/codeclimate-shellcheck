@@ -3,7 +3,7 @@
 
 module Main where
 
-import Data.Aeson       (ToJSON(..), genericToJSON)
+import Data.Aeson       (ToJSON(..), (.=), genericToJSON, object)
 import Data.Aeson.Types (defaultOptions, fieldLabelModifier)
 import Data.Char        (isUpper, toLower)
 import GHC.Generics     (Generic)
@@ -42,7 +42,13 @@ data LineColumn = LineColumn {
 instance ToJSON LineColumn where
   toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
 
-data Position = Coord LineColumn | Offset Int
+data Position = Coords LineColumn
+              | Offset Int
+              deriving Show
+
+instance ToJSON Position where
+  toJSON (Coords x) = toJSON x
+  toJSON (Offset x) = object [ "offset" .= x ]
 
 data Location = Lines FilePath BeginEnd
               | Positions FilePath Position

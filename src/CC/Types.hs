@@ -14,6 +14,9 @@ data BeginEnd = BeginEnd {
   , _end   :: Int
 } deriving (Generic, Show)
 
+instance ToJSON BeginEnd where
+  toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
+
 data Category = BugRisk
               | Clarity
               | Compatibility
@@ -22,6 +25,10 @@ data Category = BugRisk
               | Security
               | Style
               deriving Show
+
+instance ToJSON Category where
+  toJSON BugRisk = "Bug Risk"
+  toJSON x       = toJSON $ show x
 
 data Issue = Issue {
     _check_name         :: String
@@ -32,31 +39,6 @@ data Issue = Issue {
   , _content            :: Maybe String
   , _other_locations    :: Maybe [Location]
 } deriving Show
-
-data LineColumn = LineColumn {
-    _line   :: Int
-  , _column :: Int
-} deriving (Generic, Show)
-
-data Location = Lines FilePath BeginEnd
-              | Positions FilePath Position
-              deriving Show
-
-data Position = Coords LineColumn
-              | Offset Int
-              deriving Show
-
-instance ToJSON Category where
-  toJSON BugRisk       = "bug risk"
-  toJSON Clarity       = "clarity"
-  toJSON Compatibility = "compatibility"
-  toJSON Complexity    = "complexity"
-  toJSON Duplication   = "duplication"
-  toJSON Security      = "security"
-  toJSON Style         = "style"
-
-instance ToJSON BeginEnd where
-  toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
 
 instance ToJSON Issue where
   toJSON Issue{..} = object . withoutNulls $ [
@@ -73,8 +55,17 @@ instance ToJSON Issue where
       withoutNulls :: [(a, Value)] -> [(a, Value)]
       withoutNulls = filter (\(_, v) -> v /= Null)
 
+data LineColumn = LineColumn {
+    _line   :: Int
+  , _column :: Int
+} deriving (Generic, Show)
+
 instance ToJSON LineColumn where
   toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
+
+data Location = Lines FilePath BeginEnd
+              | Positions FilePath Position
+              deriving Show
 
 instance ToJSON Location where
   toJSON location = object $ case location of
@@ -83,6 +74,10 @@ instance ToJSON Location where
     where
       f :: FilePath -> Pair
       f = (.=) "path"
+
+data Position = Coords LineColumn
+              | Offset Int
+              deriving Show
 
 instance ToJSON Position where
   toJSON (Coords x) = toJSON x

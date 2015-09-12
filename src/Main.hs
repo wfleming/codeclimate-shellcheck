@@ -1,4 +1,10 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
+
+import Data.Aeson (ToJSON(..), (.=), object)
+import Data.Char  (isUpper, toLower)
 
 data Category = BugRisk
               | Clarity
@@ -7,6 +13,16 @@ data Category = BugRisk
               | Duplication
               | Security
               | Style
+              deriving Show
+
+instance ToJSON Category where
+  toJSON BugRisk       = "bug risk"
+  toJSON Clarity       = "clarity"
+  toJSON Compatibility = "compatibility"
+  toJSON Complexity    = "complexity"
+  toJSON Duplication   = "duplication"
+  toJSON Security      = "security"
+  toJSON Style         = "style"
 
 data BeginEnd = BeginEnd {
     _begin :: Int

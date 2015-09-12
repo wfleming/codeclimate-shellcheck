@@ -12,8 +12,11 @@ cabal-version: >=1.10
 executable engine
   main-is:
     Main.hs
+  other-modules:
+    CC.Types
   build-depends:
-      base >= 4.7 && < 5
+      aeson
+    , base >= 4.7 && < 5
     , bytestring
     , Glob
   hs-source-dirs: src

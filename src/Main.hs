@@ -1,10 +1,11 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
 import Data.Aeson       (ToJSON(..), (.=), genericToJSON, object)
-import Data.Aeson.Types (Pair, defaultOptions, fieldLabelModifier)
+import Data.Aeson.Types (Pair, Value(Null), defaultOptions, fieldLabelModifier)
 import Data.Char        (isUpper, toLower)
 import GHC.Generics     (Generic)
 
@@ -56,22 +57,36 @@ data Location = Lines FilePath BeginEnd
 
 instance ToJSON Location where
   toJSON location = object $ case location of
-    Lines     x y -> [ path x, "lines" .= y ]
-    Positions x y -> [ path x, "positions" .= y ]
+    Lines     x y -> [ f x, "lines" .= y ]
+    Positions x y -> [ f x, "positions" .= y ]
     where
-      path :: FilePath -> Pair
-      path x = "path" .= x
+      f :: FilePath -> Pair
+      f = (.=) "path"
 
 data Issue = Issue {
-    _type               :: String
-  , _check_name         :: String
+    _check_name         :: String
   , _description        :: String
   , _categories         :: [Category]
   , _location           :: Location
   , _remediation_points :: Maybe Int
   , _content            :: Maybe String
   , _other_locations    :: Maybe [Location]
-}
+} deriving (Generic, Show)
+
+instance ToJSON Issue where
+  toJSON Issue{..} = object . withoutNulls $ [
+        "type"               .= ("issue" :: String)
+      , "check_name"         .= _check_name
+      , "description"        .= _description
+      , "categories"         .= _categories
+      , "location"           .= _location
+      , "remediation_points" .= _remediation_points
+      , "content"            .= _content
+      , "other_locations"    .= _other_locations
+    ]
+    where
+      withoutNulls :: [(a, Value)] -> [(a, Value)]
+      withoutNulls = filter (\(_, v) -> v /= Null)
 
 main :: IO ()
 main = putStrLn "hey"

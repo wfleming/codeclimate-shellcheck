@@ -9,13 +9,17 @@ import Data.Aeson.Types (Pair, Value(Null), defaultOptions, fieldLabelModifier)
 import Data.Char        (isUpper, toLower)
 import GHC.Generics     (Generic)
 
-data BeginEnd = BeginEnd {
-    _begin :: Int
-  , _end   :: Int
-} deriving (Generic, Show)
+data BeginEnd = Positions Position Position
+              | Lines Int Int
+              deriving Show
 
 instance ToJSON BeginEnd where
-  toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
+  toJSON x = object $ case x of
+    Positions b e -> f b e
+    Lines b e     -> f b e
+    where
+      f :: (ToJSON a) => a -> a -> [Pair]
+      f x y = [ "begin" .= x, "end" .= y ]
 
 data Category = BugRisk
               | Clarity
@@ -63,14 +67,12 @@ data LineColumn = LineColumn {
 instance ToJSON LineColumn where
   toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
 
-data Location = Lines FilePath BeginEnd
-              | Positions FilePath Position
-              deriving Show
+data Location = Location FilePath BeginEnd deriving Show
 
 instance ToJSON Location where
-  toJSON location = object $ case location of
-    Lines     x y -> [ f x, "lines" .= y ]
-    Positions x y -> [ f x, "positions" .= y ]
+  toJSON (Location x y) = object $ case y of
+    Positions _ _ -> [ f x, "positions" .= y ]
+    Lines _ _     -> [ f x, "lines" .= y ]
     where
       f :: FilePath -> Pair
       f = (.=) "path"

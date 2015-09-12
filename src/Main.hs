@@ -37,7 +37,10 @@ instance ToJSON BeginEnd where
 data LineColumn = LineColumn {
     _line   :: Int
   , _column :: Int
-}
+} deriving (Generic, Show)
+
+instance ToJSON LineColumn where
+  toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
 
 data Position = Coord LineColumn | Offset Int
 

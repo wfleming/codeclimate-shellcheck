@@ -12,6 +12,8 @@ cabal-version: >=1.10
 executable engine
   main-is:
     Main.hs
+  other-modules:
+    CC.Types
   build-depends:
       aeson
     , base >= 4.7 && < 5

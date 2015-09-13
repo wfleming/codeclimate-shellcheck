@@ -3,13 +3,13 @@
 module CC.Analyse where
 
 import CC.Types as CC
-import Data.Monoid ((<>))
+
+import Data.Monoid          ((<>))
 import ShellCheck.Interface ( CheckResult(..)
                             , Comment(..)
                             , Position(..)
                             , PositionedComment(..)
-                            , Severity(..)
-                            )
+                            , Severity(..) )
 
 toCategory :: Severity -> Category
 toCategory ErrorC   = BugRisk

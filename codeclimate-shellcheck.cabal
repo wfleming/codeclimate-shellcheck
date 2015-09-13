@@ -19,5 +19,6 @@ executable engine
     , base >= 4.7 && < 5
     , bytestring
     , Glob
+    , text
   hs-source-dirs: src
   default-language: Haskell2010

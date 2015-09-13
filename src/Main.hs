@@ -1,6 +1,6 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Main where
 
+import CC.Analyse
 import CC.Types
-
-main :: IO ()
-main = putStrLn "hey"

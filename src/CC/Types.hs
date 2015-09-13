@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module CC.Types where
@@ -7,7 +8,6 @@ import Data.Aeson       (ToJSON(..), (.=), genericToJSON, object)
 import Data.Aeson.Types (Pair, Value(Null), defaultOptions, fieldLabelModifier)
 import Data.Char        (isUpper, toLower)
 import GHC.Generics     (Generic)
-import Data.Text        (pack)
 
 -- | Issues must be associated with one or more categories.
 data Category = BugRisk
@@ -20,13 +20,13 @@ data Category = BugRisk
               deriving Show
 
 instance ToJSON Category where
-  toJSON BugRisk = toJSON "Bug Risk"
+  toJSON BugRisk = "Bug Risk"
   toJSON x       = toJSON $ show x
 
 -- | Line and column numbers are 1-based.
 data LineColumn = LineColumn {
-    _line   :: Int
-  , _column :: Int
+    _line   :: Integer
+  , _column :: Integer
 } deriving (Generic, Show)
 
 instance ToJSON LineColumn where
@@ -36,18 +36,18 @@ instance ToJSON LineColumn where
 -- expressed in two ways.
 data Position = Coords LineColumn
                 -- ^ Line and column coordinates.
-              | Offset Int
+              | Offset Integer
                 -- ^ Absolute character offsets, for the entire source buffer.
               deriving Show
 
 instance ToJSON Position where
   toJSON (Coords x) = toJSON x
-  toJSON (Offset x) = toJSON $ object [ (pack "offset") .= x ]
+  toJSON (Offset x) = object [ "offset" .= x ]
 
 -- | Line-based locations emit a beginning and end line number for the issue,
 -- whereas position-based locations allow more precision.
 data BeginEnd = PositionBased Position Position
-              | LineBased Int Int
+              | LineBased Integer Integer
               deriving Show
 
 instance ToJSON BeginEnd where
@@ -56,18 +56,18 @@ instance ToJSON BeginEnd where
     LineBased     x y -> f x y
     where
       f :: (ToJSON a) => a -> a -> [Pair]
-      f x y = [ (pack "begin") .= x, (pack "end") .= y ]
+      f x y = [ "begin" .= x, "end" .= y ]
 
 -- | Locations refer to ranges of a source code file.
 data Location = Location FilePath BeginEnd deriving Show
 
 instance ToJSON Location where
   toJSON (Location x y) = object $ case y of
-    PositionBased _ _ -> [ f x, (pack "positions") .= y ]
-    LineBased _ _     -> [ f x, (pack "lines") .= y ]
+    PositionBased _ _ -> [ f x, "positions" .= y ]
+    LineBased _ _     -> [ f x, "lines" .= y ]
     where
       f :: FilePath -> Pair
-      f = (.=) (pack "path")
+      f = (.=) "path"
 
 -- | An issue represents a single instance of a real or potential code problem,
 -- detected by a static analysis Engine.
@@ -76,21 +76,21 @@ data Issue = Issue {
   , _description        :: String
   , _categories         :: [Category]
   , _location           :: Location
-  , _remediation_points :: Maybe Int
+  , _remediation_points :: Maybe Integer
   , _content            :: Maybe String
   , _other_locations    :: Maybe [Location]
 } deriving Show
 
 instance ToJSON Issue where
   toJSON Issue{..} = object . withoutNulls $ [
-        pack "type"               .= ("issue" :: String)
-      , pack "check_name"         .= _check_name
-      , pack "description"        .= _description
-      , pack "categories"         .= _categories
-      , pack "location"           .= _location
-      , pack "remediation_points" .= _remediation_points
-      , pack "content"            .= _content
-      , pack "other_locations"    .= _other_locations
+        "type"               .= ("issue" :: String)
+      , "check_name"         .= _check_name
+      , "description"        .= _description
+      , "categories"         .= _categories
+      , "location"           .= _location
+      , "remediation_points" .= _remediation_points
+      , "content"            .= _content
+      , "other_locations"    .= _other_locations
     ]
     where
       withoutNulls :: [(a, Value)] -> [(a, Value)]

@@ -2,10 +2,8 @@
 
 module CC.Analyse where
 
-import Control.Applicative
-
 import CC.Types as CC
-
+import Control.Applicative
 import Control.Exception.Base (IOException, catch)
 import Data.Monoid            ((<>))
 import ShellCheck.Checker     (checkScript)

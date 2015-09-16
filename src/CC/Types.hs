@@ -21,12 +21,12 @@ data Category = BugRisk
 
 instance ToJSON Category where
   toJSON BugRisk = "Bug Risk"
-  toJSON x       = toJSON $ show x
+  toJSON x       = toJSON $! show x
 
 -- | Line and column numbers are 1-based.
 data LineColumn = LineColumn {
-    _line   :: Integer
-  , _column :: Integer
+    _line   :: !Integer
+  , _column :: !Integer
 } deriving (Generic, Show)
 
 instance ToJSON LineColumn where
@@ -51,7 +51,7 @@ data BeginEnd = PositionBased Position Position
               deriving Show
 
 instance ToJSON BeginEnd where
-  toJSON z = object $ case z of
+  toJSON z = object $! case z of
     PositionBased x y -> f x y
     LineBased     x y -> f x y
     where
@@ -62,7 +62,7 @@ instance ToJSON BeginEnd where
 data Location = Location FilePath BeginEnd deriving Show
 
 instance ToJSON Location where
-  toJSON (Location x y) = object $ case y of
+  toJSON (Location x y) = object $! case y of
     PositionBased _ _ -> [ f x, "positions" .= y ]
     LineBased _ _     -> [ f x, "lines" .= y ]
     where
@@ -72,17 +72,17 @@ instance ToJSON Location where
 -- | An issue represents a single instance of a real or potential code problem,
 -- detected by a static analysis Engine.
 data Issue = Issue {
-    _check_name         :: String
-  , _description        :: String
-  , _categories         :: [Category]
-  , _location           :: Location
-  , _remediation_points :: Maybe Integer
-  , _content            :: Maybe String
-  , _other_locations    :: Maybe [Location]
+    _check_name         :: !String
+  , _description        :: !String
+  , _categories         :: ![Category]
+  , _location           :: !Location
+  , _remediation_points :: !(Maybe Integer)
+  , _content            :: !(Maybe String)
+  , _other_locations    :: !(Maybe [Location])
 } deriving Show
 
 instance ToJSON Issue where
-  toJSON Issue{..} = object . withoutNulls $ [
+  toJSON Issue{..} = object . withoutNulls $! [
         "type"               .= ("issue" :: String)
       , "check_name"         .= _check_name
       , "description"        .= _description

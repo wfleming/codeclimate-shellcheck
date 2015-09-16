@@ -19,6 +19,7 @@ executable engine
       aeson
     , base >= 4.7 && < 5
     , bytestring
+    , directory
     , Glob
     , ShellCheck >= 0.4.0 && < 0.5.0
   hs-source-dirs: src

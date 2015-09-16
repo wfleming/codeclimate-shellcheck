@@ -16,13 +16,14 @@ import ShellCheck.Interface   (CheckResult(..)
                              , Position(..)
                              , PositionedComment(..)
                              , Severity(..)
-                             , SystemInterface(..))
+                             , SystemInterface(..)
+                             , emptyCheckSpec)
 
 -- | Main function that analyses shell files.
 analyse :: FilePath -> IO [Issue]
 analyse x = do
   y <- readFile x
-  z <- checkScript interface (defaultCheckSpec { csFilename = x, csScript = y })
+  z <- checkScript interface (emptyCheckSpec { csFilename = x, csScript = y })
   return $ transform z
   where
     interface :: SystemInterface IO
@@ -34,15 +35,6 @@ categorise ErrorC   = BugRisk
 categorise InfoC    = BugRisk
 categorise StyleC   = Style
 categorise WarningC = BugRisk
-
--- | Builds default, empty, CheckSpec.
-defaultCheckSpec :: CheckSpec
-defaultCheckSpec = CheckSpec {
-      csFilename = ""
-    , csScript = ""
-    , csExcludedWarnings = []
-    , csShellTypeOverride = Nothing
-}
 
 -- | Builds default IO interface with error handling.
 defaultInterface :: FilePath -> IO (Either ErrorMessage String)

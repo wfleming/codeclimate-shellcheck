@@ -14,10 +14,7 @@ import System.FilePath.Glob (compile, globDir)
 import qualified Data.ByteString.Lazy as BL
 
 main :: IO ()
-main = do
-  x <- shFiles
-  y <- analyseFiles x
-  mapM_ printIssue y
+main = shFiles >>= analyseFiles >>= mapM_ printIssue
 
 printIssue :: Issue -> IO ()
 printIssue = BL.putStr . (<> "\0") . encode

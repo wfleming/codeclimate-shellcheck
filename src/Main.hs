@@ -1,13 +1,30 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
-import CC.Analyse       (analyse)
-import Data.Monoid      ((<>))
-import System.Directory (getCurrentDirectory)
+import CC.Analyse
+import CC.Types
+import Control.Applicative
+import Data.Aeson           (encode)
+import Data.Monoid          ((<>))
+import System.Directory     (getCurrentDirectory)
+import System.FilePath.Glob (compile, globDir)
+
+import qualified Data.ByteString.Lazy as BL
 
 main :: IO ()
 main = do
-  currentDir <- getCurrentDirectory
-  issues <- analyse $ currentDir <> "/test/example.sh"
-  putStrLn (show issues)
+  x <- shFiles
+  y <- analyseFiles x
+  mapM_ printIssue y
+
+printIssue :: Issue -> IO ()
+printIssue = BL.putStr . (<> "\0") . encode
+
+shFiles :: IO [FilePath]
+shFiles = map clean . concat . fst <$> globDir [compile "**/*.sh"] "."
+  where
+    clean :: [Char] -> [Char]
+    clean ('.' : '/' : x) = x
+    clean x               = x

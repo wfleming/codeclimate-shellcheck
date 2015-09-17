@@ -17,7 +17,10 @@ import ShellCheck.Interface   (CheckResult(..)
                              , SystemInterface(..)
                              , emptyCheckSpec)
 
--- | Main function that analyses shell files.
+analyseFiles :: [FilePath] -> IO [Issue]
+analyseFiles = fmap concat . mapM analyse
+
+-- | Main function that analyses a shell script.
 analyse :: FilePath -> IO [Issue]
 analyse x = do
   y <- readFile x

@@ -16,16 +16,16 @@ import qualified Data.ByteString.Lazy as BL
 
 main :: IO ()
 main = do
-  (Config x) <- loadConfig "/config.json"
-  y          <- shFiles x
-  z          <- analyseFiles y
+  x <- loadConfig "/config.json"
+  y <- shFiles (_include_paths x)
+  z <- analyseFiles y
   mapM_ printIssue z
 
 loadConfig :: FilePath -> IO Config
 loadConfig x = do
     y <- doesFileExist x
     z <- if y then decode <$> BL.readFile x else return Nothing
-    return $ fromMaybe (Config []) z
+    return $ fromMaybe (Config { _include_paths = [] }) z
 
 printIssue :: Issue -> IO ()
 printIssue = BL.putStr . (<> "\0") . encode

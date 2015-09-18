@@ -4,7 +4,7 @@
 
 module CC.Types where
 
-import Data.Aeson       (ToJSON(..), (.=), genericToJSON, object)
+import Data.Aeson       (FromJSON(..), ToJSON(..), (.=), genericParseJSON, genericToJSON, object)
 import Data.Aeson.Types (Pair, Value(Null), defaultOptions, fieldLabelModifier)
 import Data.Char        (isUpper, toLower)
 import GHC.Generics     (Generic)
@@ -82,7 +82,7 @@ data Issue = Issue {
 } deriving Show
 
 instance ToJSON Issue where
-  toJSON Issue{..} = object . withoutNulls $! [
+  toJSON Issue{..} = (object . withoutNulls) [
         "type"               .= ("issue" :: String)
       , "check_name"         .= _check_name
       , "description"        .= _description
@@ -95,3 +95,9 @@ instance ToJSON Issue where
     where
       withoutNulls :: [(a, Value)] -> [(a, Value)]
       withoutNulls = filter (\(_, v) -> v /= Null)
+
+-- | Engine configuration mounted at /config.json.
+data Config = Config { _include_paths :: ![FilePath] } deriving (Generic, Show)
+
+instance FromJSON Config where
+  parseJSON = genericParseJSON defaultOptions { fieldLabelModifier = drop 1 }

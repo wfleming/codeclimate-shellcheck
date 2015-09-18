@@ -16,9 +16,9 @@ import qualified Data.ByteString.Lazy as BL
 
 main :: IO ()
 main = do
-  x <- loadConfig "/config.json"
-  y <- shFiles
-  z <- analyseFiles ((_include_paths x) ++ y)
+  (Config x) <- loadConfig "/config.json"
+  y          <- shFiles x
+  z          <- analyseFiles y
   mapM_ printIssue z
 
 loadConfig :: FilePath -> IO Config
@@ -30,9 +30,9 @@ loadConfig x = do
 printIssue :: Issue -> IO ()
 printIssue = BL.putStr . (<> "\0") . encode
 
-shFiles :: IO [FilePath]
-shFiles = fmap clean . concat . fst <$> globDir [compile "**/*.sh"] "."
+shFiles :: [FilePath] -> IO [FilePath]
+shFiles x =
+  fmap concat (sequence $ fmap (f . (globDir [compile "**/*.sh"])) x)
   where
-    clean :: [Char] -> [Char]
-    clean ('.' : '/' : x) = x
-    clean x               = x
+    f :: IO ([[FilePath]], [FilePath]) -> IO [FilePath]
+    f x = (concat . fst) <$> x

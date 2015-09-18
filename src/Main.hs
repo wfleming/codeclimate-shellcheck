@@ -31,7 +31,7 @@ printIssue = BL.putStr . (<> "\0") . encode
 
 shFiles :: [FilePath] -> IO [FilePath]
 shFiles x =
-  fmap concat (sequence $ fmap (f . globDir [compile "**/*.sh"]) x)
+  fmap concat $ sequence $ fmap (f . globDir [compile "**/*.sh"]) x
   where
     f :: IO ([[FilePath]], [FilePath]) -> IO [FilePath]
     f x = (concat . fst) <$> x

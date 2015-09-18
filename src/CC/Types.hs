@@ -82,7 +82,7 @@ data Issue = Issue {
 } deriving Show
 
 instance ToJSON Issue where
-  toJSON Issue{..} = object . withoutNulls $! [
+  toJSON Issue{..} = (object . withoutNulls) [
         "type"               .= ("issue" :: String)
       , "check_name"         .= _check_name
       , "description"        .= _description

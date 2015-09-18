@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
@@ -25,14 +24,14 @@ loadConfig :: FilePath -> IO Config
 loadConfig x = do
     y <- doesFileExist x
     z <- if y then decode <$> BL.readFile x else return Nothing
-    return $ fromMaybe (Config { _include_paths = [] }) z
+    return $ fromMaybe Config { _include_paths = [] } z
 
 printIssue :: Issue -> IO ()
 printIssue = BL.putStr . (<> "\0") . encode
 
 shFiles :: [FilePath] -> IO [FilePath]
 shFiles x =
-  fmap concat (sequence $ fmap (f . (globDir [compile "**/*.sh"])) x)
+  fmap concat (sequence $ fmap (f . globDir [compile "**/*.sh"]) x)
   where
     f :: IO ([[FilePath]], [FilePath]) -> IO [FilePath]
     f x = (concat . fst) <$> x

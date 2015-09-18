@@ -61,4 +61,4 @@ transform CheckResult{..} = fmap f crComments
       }
       where
         coords :: CC.Position
-        coords = Coords (LineColumn { _line = posLine, _column = posColumn })
+        coords = Coords LineColumn { _line = posLine, _column = posColumn }

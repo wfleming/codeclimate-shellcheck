@@ -24,7 +24,7 @@ loadConfig :: FilePath -> IO Config
 loadConfig x = do
     y <- doesFileExist x
     z <- if y then decode <$> BL.readFile x else return Nothing
-    return $ fromMaybe Config { _include_paths = [] } z
+    return $ fromMaybe Config { _include_paths = ["."] } z
 
 printIssue :: Issue -> IO ()
 printIssue = BL.putStr . (<> "\0") . encode

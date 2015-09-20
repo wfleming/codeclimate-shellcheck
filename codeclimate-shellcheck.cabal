@@ -22,7 +22,7 @@ executable engine
   main-is:
     Main.hs
   other-modules:
-    CC.Analyse
+    CC.Analyze
     CC.Types
   build-depends:
       aeson      >= 0.9.0.1  && < 0.10.0.0

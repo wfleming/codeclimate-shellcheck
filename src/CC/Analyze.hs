@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module CC.Analyse where
+module CC.Analyze where
 
 import CC.Types as CC
 import Control.Applicative
@@ -17,13 +17,13 @@ import ShellCheck.Interface   (CheckResult(..)
                              , SystemInterface(..)
                              , emptyCheckSpec)
 
--- | Main function that analyses a list of shell scripts.
-analyseFiles :: [FilePath] -> IO [Issue]
-analyseFiles = fmap concat . mapM analyse
+-- | Main function that analyzes a list of shell scripts.
+analyzeFiles :: [FilePath] -> IO [Issue]
+analyzeFiles = fmap concat . mapM analyze
 
--- | Main function that analyses a shell script.
-analyse :: FilePath -> IO [Issue]
-analyse x = do
+-- | Main function that analyzes a shell script.
+analyze :: FilePath -> IO [Issue]
+analyze x = do
   y <- readFile x
   z <- checkScript interface (emptyCheckSpec { csFilename = x, csScript = y })
   return $ transform z

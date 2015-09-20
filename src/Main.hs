@@ -2,7 +2,7 @@
 
 module Main where
 
-import CC.Analyse
+import CC.Analyze
 import CC.Types
 import Control.Applicative
 import Data.Aeson           (FromJSON, decode, encode)
@@ -17,7 +17,7 @@ main :: IO ()
 main = do
   x <- loadConfig "/config.json"
   y <- shFiles (_include_paths x)
-  z <- analyseFiles y
+  z <- analyzeFiles y
   mapM_ printIssue z
 
 loadConfig :: FilePath -> IO Config

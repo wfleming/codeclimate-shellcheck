@@ -1,4 +1,4 @@
-FROM haskell:7.10
+FROM haskell:7.8
 MAINTAINER Philip Cunningham <hello@filib.io>
 
 RUN useradd -u 9000 -d /home/app -m app

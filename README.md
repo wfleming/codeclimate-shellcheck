@@ -1,5 +1,7 @@
 # Code Climate ShellCheck Engine
 
+[![Build Status](https://travis-ci.org/filib/codeclimate-shellcheck.svg?branch=master)](https://travis-ci.org/filib/codeclimate-shellcheck)
+
 `codeclimate-shellcheck` is a Code Climate engine that wraps
 [ShellCheck](http://www.shellcheck.net/). You can run it on your
 command line using the Code Climate CLI, or on our hosted analysis

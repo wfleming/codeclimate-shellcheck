@@ -6,7 +6,6 @@ USER app
 WORKDIR /home/app
 
 COPY codeclimate-shellcheck.cabal /home/app/codeclimate-shellcheck.cabal
-COPY cabal.config /home/app/cabal.config
 RUN cabal update; cabal install --dependencies-only -j4
 
 COPY src /home/app/src

@@ -1,0 +1,7 @@
+resolver: lts-3.18
+system-ghc: false
+install-ghc: true
+packages:
+- '.'
+extra-deps:
+  - ShellCheck-0.4.1

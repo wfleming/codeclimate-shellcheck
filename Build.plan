@@ -1,0 +1,6 @@
+FROM fpco/stack-build:lts-3.18
+MAINTAINER Philip Cunningham <hello@filib.io>
+
+ADD . /home/app
+WORKDIR /home/app
+CMD ["stack"]

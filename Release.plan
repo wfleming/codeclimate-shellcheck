@@ -1,0 +1,15 @@
+FROM busybox
+MAINTAINER Philip Cunningham <hello@filib.io>
+
+RUN useradd -u 9000 -d /home/app -m app
+USER app
+WORKDIR /home/app
+
+COPY src /home/app/src
+COPY LICENSE /home/app/LICENSE
+ADD .stack-work/install/x86_64-linux/lts-3.18/7.10.2/bin/engine /home/app/bin/engine
+
+VOLUME /code
+WORKDIR /code
+
+ENTRYPOINT ["/home/app/bin/engine"]

@@ -25,11 +25,11 @@ executable engine
     CC.Analyze
     CC.Types
   build-depends:
-      aeson
-    , base
-    , bytestring
-    , directory
-    , Glob
-    , ShellCheck
+      aeson      >= 0.9.0.1  && <= 0.10.0.0
+    , base       >= 4.7      && <= 5
+    , bytestring >= 0.10.4.0 && <= 0.11.0.0
+    , directory  >= 1.2.1.0  && <= 1.3.0.0
+    , Glob       >= 0.7.5    && <= 0.8.0
+    , ShellCheck >= 0.4.1    && <= 0.5.0
   hs-source-dirs: src
   default-language: Haskell2010

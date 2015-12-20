@@ -1,7 +1,9 @@
-FROM centos:centos7
+FROM frolvlad/alpine-glibc:3.2
 MAINTAINER Philip Cunningham <hello@filib.io>
 
-RUN useradd -u 9000 -d /home/app -m app
+RUN apk add --update gmp
+
+RUN adduser -u 9000 -h /home/app -D app
 USER app
 WORKDIR /home/app
 

@@ -1,7 +1,7 @@
-FROM frolvlad/alpine-glibc:3.2
+FROM progrium/busybox
 MAINTAINER Philip Cunningham <hello@filib.io>
 
-RUN apk add --update gmp
+RUN opkg-install libgmp
 
 RUN adduser -u 9000 -h /home/app -D app
 USER app

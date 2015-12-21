@@ -4,10 +4,15 @@
 
 module CC.Types where
 
-import Data.Aeson       (FromJSON(..), ToJSON(..), (.=), genericParseJSON, genericToJSON, object)
-import Data.Aeson.Types (Pair, Value(Null), defaultOptions, fieldLabelModifier)
-import Data.Char        (isUpper, toLower)
-import GHC.Generics     (Generic)
+import           Control.Applicative
+import           Data.Aeson
+import           Data.Aeson.Types
+import           Data.Char
+import qualified Data.Map.Strict as DM
+import qualified Data.Text as T
+import           GHC.Generics
+
+--------------------------------------------------------------------------------
 
 -- | Issues must be associated with one or more categories.
 data Category = BugRisk
@@ -23,6 +28,8 @@ instance ToJSON Category where
   toJSON BugRisk = "Bug Risk"
   toJSON x       = toJSON $! show x
 
+--------------------------------------------------------------------------------
+
 -- | Line and column numbers are 1-based.
 data LineColumn = LineColumn {
     _line   :: !Integer
@@ -31,6 +38,8 @@ data LineColumn = LineColumn {
 
 instance ToJSON LineColumn where
   toJSON = genericToJSON defaultOptions { fieldLabelModifier = drop 1 }
+
+--------------------------------------------------------------------------------
 
 -- | Positions refer to specific characters within a source file, and can be
 -- expressed in two ways.
@@ -43,6 +52,8 @@ data Position = Coords LineColumn
 instance ToJSON Position where
   toJSON (Coords x) = toJSON x
   toJSON (Offset x) = object [ "offset" .= x ]
+
+--------------------------------------------------------------------------------
 
 -- | Line-based locations emit a beginning and end line number for the issue,
 -- whereas position-based locations allow more precision.
@@ -58,6 +69,8 @@ instance ToJSON BeginEnd where
       f :: (ToJSON a) => a -> a -> [Pair]
       f x y = [ "begin" .= x, "end" .= y ]
 
+--------------------------------------------------------------------------------
+
 -- | Locations refer to ranges of a source code file.
 data Location = Location FilePath BeginEnd deriving Show
 
@@ -69,21 +82,36 @@ instance ToJSON Location where
       f :: FilePath -> Pair
       f = (.=) "path"
 
+--------------------------------------------------------------------------------
+
+-- | A markdown snippet describing the issue, including deeper explanations and
+-- links to other resources.
+data Content = Body T.Text deriving Show
+
+instance ToJSON Content where
+  toJSON (Body x) = object [ "body" .=  x ]
+
+instance FromJSON Content where
+   parseJSON (Object x) = Body <$> x .: "body"
+   parseJSON _          = empty
+
+--------------------------------------------------------------------------------
+
 -- | An issue represents a single instance of a real or potential code problem,
 -- detected by a static analysis Engine.
 data Issue = Issue {
-    _check_name         :: !String
-  , _description        :: !String
+    _check_name         :: !T.Text
+  , _description        :: !T.Text
   , _categories         :: ![Category]
   , _location           :: !Location
   , _remediation_points :: !(Maybe Integer)
-  , _content            :: !(Maybe String)
+  , _content            :: !(Maybe Content)
   , _other_locations    :: !(Maybe [Location])
 } deriving Show
 
 instance ToJSON Issue where
   toJSON Issue{..} = (object . withoutNulls) [
-        "type"               .= ("issue" :: String)
+        "type"               .= ("issue" :: T.Text)
       , "check_name"         .= _check_name
       , "description"        .= _description
       , "categories"         .= _categories
@@ -96,8 +124,27 @@ instance ToJSON Issue where
       withoutNulls :: [(a, Value)] -> [(a, Value)]
       withoutNulls = filter (\(_, v) -> v /= Null)
 
+--------------------------------------------------------------------------------
+
 -- | Engine configuration mounted at /config.json.
 data Config = Config { _include_paths :: ![FilePath] } deriving (Generic, Show)
 
 instance FromJSON Config where
   parseJSON = genericParseJSON defaultOptions { fieldLabelModifier = drop 1 }
+
+--------------------------------------------------------------------------------
+
+-- | A mapping represents remediation points and associated textual content.
+data Mapping = Mapping Integer Content deriving Show
+
+instance FromJSON Mapping where
+   parseJSON (Object x) = Mapping
+                          <$> x .: "remediation_points"
+                          <*> x .: "content"
+   parseJSON _          = empty
+
+--------------------------------------------------------------------------------
+
+-- | An env represents mappings between check names, content and remediation
+-- values.
+type Env = DM.Map T.Text Mapping

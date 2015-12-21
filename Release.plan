@@ -1,7 +1,7 @@
 FROM progrium/busybox
 MAINTAINER Philip Cunningham <hello@filib.io>
 
-RUN opkg-install libgmp
+ADD .local/libgmp.so.10 /usr/lib/libgmp.so.10
 
 RUN adduser -u 9000 -h /home/app -D app
 USER app

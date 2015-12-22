@@ -5,13 +5,17 @@ module Main where
 import           CC.Analyze
 import           CC.Types
 import           Data.Aeson
+import           Data.Attoparsec.ByteString.Lazy
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Map.Strict as DM
 import           Data.Maybe
 import           Data.Monoid
+import           Data.Word
 import qualified Data.Yaml as YML
 import           System.Directory
 import           System.FilePath.Glob
+import           System.FilePath.Posix
 
 --------------------------------------------------------------------------------
 
@@ -19,7 +23,7 @@ main :: IO ()
 main = do
   config <- loadConfig "/config.json"
   env <- fromMaybe DM.empty <$> YML.decodeFile "data/mapping.yml"
-  paths <- shFiles $! _include_paths config
+  paths <- shellScripts $! _include_paths config
   issues <- analyzeFiles env paths
   mapM_ printIssue issues
 
@@ -38,9 +42,83 @@ printIssue = BSL.putStr . (<> "\0") . encode
 
 --------------------------------------------------------------------------------
 
-shFiles :: [FilePath] -> IO [FilePath]
-shFiles paths =
+shellScripts :: [FilePath] -> IO [FilePath]
+shellScripts paths =
   fmap concat $! sequence $! fmap (matched . globDir [compile "**/*.sh"]) paths
   where
     matched :: Functor f => f ([[a]], [b]) -> f [a]
     matched x = (concat . fst) <$> x
+
+--------------------------------------------------------------------------------
+
+-- | Determines whether a file is a shell script that we can work with.
+isShellScript :: FilePath -> IO Bool
+isShellScript path =
+  if hasExtension path
+    then return hasShellExtension
+    else do
+      header <- readHeader
+      if hasShebang header
+        then case readShebang header of
+          Just (Shebang x y) -> return $ hasValidInterpretter x y
+          Nothing            -> return False
+        else return False
+  where
+    ----------------------------------------------------------------------------
+
+    carriageReturn :: Word8 -> Bool
+    carriageReturn = (== 13)
+
+    endOfLine :: Word8 -> Bool
+    endOfLine x = newline x || carriageReturn x
+
+    newline :: Word8 -> Bool
+    newline = (== 10)
+
+    whitespace :: Word8 -> Bool
+    whitespace = (== 32)
+
+    ----------------------------------------------------------------------------
+
+    whiteList :: [BS.ByteString]
+    whiteList = [ "sh"
+                , "ash"
+                , "dash"
+                , "bash"
+                , "ksh"
+                ]
+
+    ----------------------------------------------------------------------------
+
+    hasShebang :: BSL.ByteString -> Bool
+    hasShebang x = BSL.take 2 x == "#!"
+
+    hasShellExtension :: Bool
+    hasShellExtension = takeExtension path == ".sh"
+
+    hasValidInterpretter :: BS.ByteString -> BS.ByteString -> Bool
+    hasValidInterpretter interpretter arguments =
+      if BS.isSuffixOf "env" interpretter
+        then any (`BS.isPrefixOf` arguments) whiteList
+        else any (`BS.isSuffixOf` interpretter) whiteList
+
+    ----------------------------------------------------------------------------
+
+    readHeader :: IO BSL.ByteString
+    readHeader = do
+      contents <- BSL.readFile path
+      return $ BSL.takeWhile (not . endOfLine) contents
+
+    readShebang :: BSL.ByteString -> Maybe Shebang
+    readShebang x = maybeResult $ parse shebang x
+
+    ----------------------------------------------------------------------------
+
+    shebang :: Parser Shebang
+    shebang = do
+      _            <- string "#!"
+      interpretter <- takeTill whitespace
+      arguments    <- option "" $ do
+        _ <- string " "
+        takeTill endOfLine
+      return $ Shebang interpretter arguments

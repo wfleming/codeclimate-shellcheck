@@ -137,10 +137,11 @@ instance FromJSON Config where
 data Mapping = Mapping Integer Content deriving Show
 
 instance FromJSON Mapping where
-   parseJSON (Object x) = Mapping
-                          <$> x .: "remediation_points"
-                          <*> x .: "content"
-   parseJSON _          = empty
+  parseJSON (Object x) = do
+     points  <- x .: "remediation_points"
+     content <- x .: "content"
+     return $ Mapping points content
+  parseJSON _          = empty
 
 --------------------------------------------------------------------------------
 

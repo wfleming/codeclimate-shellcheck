@@ -9,6 +9,7 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.Map.Strict as DM
 import           Data.Maybe
 import           Data.Monoid
+import qualified Data.Yaml as YML
 import           System.Directory
 import           System.FilePath.Glob
 
@@ -17,10 +18,14 @@ import           System.FilePath.Glob
 main :: IO ()
 main = do
   config <- loadConfig "/config.json"
-  mapping <- decode <$> BSL.readFile "data/mapping.json"
+  mapping <- YML.decodeFile "data/mapping.yml" :: IO (Maybe Env)
   paths <- shFiles $ _include_paths config
-  issues <- fmap concat . mapM (analyze $ fromMaybe DM.empty mapping) $ paths
+  issues <- fmap concat . mapM (analyze $ fromMaybeEnv mapping) $ paths
   mapM_ printIssue issues
+  where
+    fromMaybeEnv :: Maybe Env -> Env
+    fromMaybeEnv (Just x) = x
+    fromMaybeEnv Nothing  = DM.empty
 
 --------------------------------------------------------------------------------
 

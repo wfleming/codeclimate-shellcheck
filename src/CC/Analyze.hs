@@ -87,14 +87,14 @@ fromPositionedComment env (PositionedComment Position{..} (Comment severity code
     location x y = Location x $ PositionBased y y
 
     remediationPoints :: Maybe Mapping -> Maybe Integer
-    remediationPoints mapping = Just $ case severity of
-      ErrorC   -> 4 * f mapping
-      WarningC -> 3 * f mapping
-      InfoC    -> 2 * f mapping
-      StyleC   -> 1 * f mapping
-      where
-        f (Just (Mapping x _)) = x
-        f Nothing              = defaultRemediationPoints
+    remediationPoints (Just (Mapping x _)) =
+      Just x
+    remediationPoints Nothing =
+      Just $ case severity of
+        ErrorC   -> 4 * defaultRemediationPoints
+        WarningC -> 3 * defaultRemediationPoints
+        InfoC    -> 2 * defaultRemediationPoints
+        StyleC   -> 1 * defaultRemediationPoints
 
     content :: Mapping -> Content
     content (Mapping _ x) = x

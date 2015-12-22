@@ -1,4 +1,4 @@
-Please note, this engine is not currently available on the CodeClimate platform.
+Please note, this engine is currently under development and not currently available on the CodeClimate platform.
 
 # Code Climate ShellCheck Engine
 

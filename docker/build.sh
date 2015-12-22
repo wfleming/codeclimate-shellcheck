@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Prepare the data mappings.
+./data/prepare.rb
+
 # Build the build container.
 docker build -t codeclimate-shellcheck-build:latest -f "$PWD/docker/Build.plan" .
 

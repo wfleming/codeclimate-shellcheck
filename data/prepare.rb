@@ -23,7 +23,12 @@ mapping = {}
 paths.each do |path|
   id = path.scan(/SC\d{3,}/).join
   body = File.read(path) + notice
-  mapping[id] = { "remediation_points" => 50_000, "content" => { "body" => body } }
+  mapping[id] = {
+    'remediation_points' => 50_000,
+    'content' => {
+      'body' => body
+    }
+  }
 end
 
 # IO ()

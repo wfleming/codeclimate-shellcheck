@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Prepare the data mappings.
+git submodule init
+git submodule update
+./data/prepare.rb
+
 # Build the build container.
 docker build -t codeclimate-shellcheck-build:latest -f "$PWD/docker/Build.plan" .
 

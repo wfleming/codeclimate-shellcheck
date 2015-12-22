@@ -18,9 +18,9 @@ import           System.FilePath.Glob
 main :: IO ()
 main = do
   config <- loadConfig "/config.json"
-  mapping <- YML.decodeFile "data/mapping.yml" :: IO (Maybe Env)
+  env <- fromMaybe DM.empty <$> YML.decodeFile "data/mapping.yml"
   paths <- shFiles $! _include_paths config
-  issues <- fmap concat . mapM (analyze $! fromMaybe DM.empty mapping) $! paths
+  issues <- analyzeFiles env paths
   mapM_ printIssue issues
 
 --------------------------------------------------------------------------------

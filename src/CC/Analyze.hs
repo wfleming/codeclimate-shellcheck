@@ -13,6 +13,12 @@ import           ShellCheck.Interface
 
 --------------------------------------------------------------------------------
 
+-- | Main function for multiple shell scripts.
+analyzeFiles :: Env -> [FilePath] -> IO [Issue]
+analyzeFiles env = fmap concat . mapM (analyze env)
+
+--------------------------------------------------------------------------------
+
 -- | Main function for analyzing a shell script.
 analyze :: Env -> FilePath -> IO [Issue]
 analyze env path = do

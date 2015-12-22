@@ -65,14 +65,12 @@ fromCheckResult env CheckResult{..} = fmap (fromPositionedComment env) crComment
 -- | Maps from a PositionedComment to an Issue.
 fromPositionedComment :: Env -> PositionedComment -> Issue
 fromPositionedComment env (PositionedComment Position{..} (Comment severity code desc)) =
-  let coords = Coords LineColumn { _line = posLine, _column = posColumn } in
-  let maybeMapping = DM.lookup checkName env in
   Issue { _check_name         = checkName
         , _description        = description
         , _categories         = categories
-        , _location           = location coords
-        , _remediation_points = remediationPoints maybeMapping
-        , _content            = content <$> maybeMapping
+        , _location           = location
+        , _remediation_points = remediationPoints
+        , _content            = content
         , _other_locations    = Nothing
         }
   where
@@ -85,18 +83,23 @@ fromPositionedComment env (PositionedComment Position{..} (Comment severity code
     categories :: [Category]
     categories = [fromSeverity severity]
 
-    location :: CC.Position -> Location
-    location x = Location posFile $ PositionBased x x
+    coords :: CC.Position
+    coords = Coords LineColumn { _line = posLine, _column = posColumn }
 
-    remediationPoints :: Maybe Mapping -> Maybe Integer
-    remediationPoints (Just (Mapping x _)) =
-      Just x
-    remediationPoints Nothing =
-      Just $ case severity of
+    location :: Location
+    location = Location posFile $ PositionBased coords coords
+
+    mapping :: Maybe Mapping
+    mapping = DM.lookup checkName env
+
+    remediationPoints :: Maybe Integer
+    remediationPoints = case mapping of
+      Just (Mapping x _) -> Just x
+      Nothing            -> Just $! case severity of
         ErrorC   -> 4 * defaultRemediationPoints
         WarningC -> 3 * defaultRemediationPoints
         InfoC    -> 2 * defaultRemediationPoints
         StyleC   -> 1 * defaultRemediationPoints
 
-    content :: Mapping -> Content
-    content (Mapping _ x) = x
+    content :: Maybe Content
+    content = fmap (\(Mapping _ x) -> x) mapping

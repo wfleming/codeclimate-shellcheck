@@ -28,9 +28,7 @@ main = do
 loadConfig :: FilePath -> IO Config
 loadConfig path = do
     fileExists <- doesFileExist path
-    config <- case fileExists of
-      True  -> decode <$> BSL.readFile path
-      False -> return Nothing
+    config <- if fileExists then decode <$> BSL.readFile path else return Nothing
     return $ fromMaybe Config { _include_paths = ["."] } config
 
 --------------------------------------------------------------------------------

@@ -18,7 +18,7 @@ main :: IO ()
 main = do
   config <- loadConfig "/config.json"
   mapping <- decode <$> BSL.readFile "data/mapping.json"
-  paths <- shFiles (_include_paths config)
+  paths <- shFiles $ _include_paths config
   issues <- fmap concat . mapM (analyze $ fromMaybe DM.empty mapping) $ paths
   mapM_ printIssue issues
 

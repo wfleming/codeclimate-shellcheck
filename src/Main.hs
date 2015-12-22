@@ -20,12 +20,8 @@ main = do
   config <- loadConfig "/config.json"
   mapping <- YML.decodeFile "data/mapping.yml" :: IO (Maybe Env)
   paths <- shFiles $ _include_paths config
-  issues <- fmap concat . mapM (analyze $ fromMaybeEnv mapping) $ paths
+  issues <- fmap concat . mapM (analyze $ fromMaybe DM.empty mapping) $ paths
   mapM_ printIssue issues
-  where
-    fromMaybeEnv :: Maybe Env -> Env
-    fromMaybeEnv (Just x) = x
-    fromMaybeEnv Nothing  = DM.empty
 
 --------------------------------------------------------------------------------
 

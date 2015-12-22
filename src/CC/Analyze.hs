@@ -65,26 +65,28 @@ fromCheckResult env CheckResult{..} = fmap (fromPositionedComment env) crComment
 -- | Maps from a PositionedComment to an Issue.
 fromPositionedComment :: Env -> PositionedComment -> Issue
 fromPositionedComment env (PositionedComment Position{..} (Comment severity code desc)) =
-  let checkName = "SC" <> T.pack (show code) in
   let coords = Coords LineColumn { _line = posLine, _column = posColumn } in
-  let envVal = DM.lookup checkName env in
+  let maybeMapping = DM.lookup checkName env in
   Issue { _check_name         = checkName
-        , _description        = description desc
+        , _description        = description
         , _categories         = categories
-        , _location           = location posFile coords
-        , _remediation_points = remediationPoints envVal
-        , _content            = content <$> envVal
+        , _location           = location coords
+        , _remediation_points = remediationPoints maybeMapping
+        , _content            = content <$> maybeMapping
         , _other_locations    = Nothing
         }
   where
-    description :: String -> T.Text
-    description = T.pack
+    checkName :: T.Text
+    checkName = "SC" <> T.pack (show code)
+
+    description :: T.Text
+    description = T.pack desc
 
     categories :: [Category]
     categories = [fromSeverity severity]
 
-    location :: FilePath -> CC.Position -> Location
-    location x y = Location x $ PositionBased y y
+    location :: CC.Position -> Location
+    location x = Location posFile $ PositionBased x x
 
     remediationPoints :: Maybe Mapping -> Maybe Integer
     remediationPoints (Just (Mapping x _)) =

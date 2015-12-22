@@ -16,7 +16,7 @@ Dir.chdir('data/wiki')
 # [String]
 paths = Dir.glob('*.md').select { |path| path =~ /SC\d{3,}.md/ }
 
-# { String => { body: String } }
+# { String => { content: { body: String } } }
 mapping = {}
 
 # IO ()

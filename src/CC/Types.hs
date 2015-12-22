@@ -7,7 +7,6 @@ module CC.Types where
 import           Control.Applicative
 import           Data.Aeson
 import           Data.Aeson.Types
-import           Data.Char
 import qualified Data.Map.Strict as DM
 import qualified Data.Text as T
 import           GHC.Generics

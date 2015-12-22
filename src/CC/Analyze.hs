@@ -42,7 +42,7 @@ defaultInterface path = catch (Right <$> readFile path) handler
 -- including the time for the developer to open the code, make the change, and
 -- confidently commit the fix. All other remediation points values are expressed
 -- in multiples of that Basic Remediation Point Value.
-defaultRemediationPoints :: Integer
+defaultRemediationPoints :: Int
 defaultRemediationPoints = 50000
 
 --------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ fromPositionedComment env (PositionedComment Position{..} (Comment severity code
     mapping :: Maybe Mapping
     mapping = DM.lookup checkName env
 
-    remediationPoints :: Maybe Integer
+    remediationPoints :: Maybe Int
     remediationPoints = case mapping of
       Just (Mapping x _) -> Just x
       Nothing            -> Just $! case severity of

@@ -44,7 +44,7 @@ instance ToJSON LineColumn where
 -- expressed in two ways.
 data Position = Coords LineColumn
                 -- ^ Line and column coordinates.
-              | Offset Integer
+              | Offset Int
                 -- ^ Absolute character offsets, for the entire source buffer.
               deriving Show
 
@@ -57,7 +57,7 @@ instance ToJSON Position where
 -- | Line-based locations emit a beginning and end line number for the issue,
 -- whereas position-based locations allow more precision.
 data BeginEnd = PositionBased Position Position
-              | LineBased Integer Integer
+              | LineBased Int Int
               deriving Show
 
 instance ToJSON BeginEnd where
@@ -103,7 +103,7 @@ data Issue = Issue {
   , _description        :: !T.Text
   , _categories         :: ![Category]
   , _location           :: !Location
-  , _remediation_points :: !(Maybe Integer)
+  , _remediation_points :: !(Maybe Int)
   , _content            :: !(Maybe Content)
   , _other_locations    :: !(Maybe [Location])
 } deriving Show
@@ -134,7 +134,7 @@ instance FromJSON Config where
 --------------------------------------------------------------------------------
 
 -- | A mapping represents remediation points and associated textual content.
-data Mapping = Mapping Integer Content deriving Show
+data Mapping = Mapping Int Content deriving Show
 
 instance FromJSON Mapping where
   parseJSON (Object x) = do

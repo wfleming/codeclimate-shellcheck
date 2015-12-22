@@ -1,3 +1,5 @@
+Please note, this engine is not currently available on the CodeClimate platform.
+
 # Code Climate ShellCheck Engine
 
 [![Build Status](https://travis-ci.org/filib/codeclimate-shellcheck.svg?branch=master)](https://travis-ci.org/filib/codeclimate-shellcheck)

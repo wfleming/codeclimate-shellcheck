@@ -17,11 +17,11 @@ import           ShellCheck.Interface
 analyze :: Env -> FilePath -> IO [Issue]
 analyze env path = do
   shellScript <- readFile path
-  result <- checkScript interface $! checkSpec path shellScript
+  result <- checkScript interface $! checkSpec shellScript
   return $! fromCheckResult env result
   where
-    checkSpec :: FilePath -> String -> CheckSpec
-    checkSpec x y = emptyCheckSpec { csFilename = x, csScript = y }
+    checkSpec :: String -> CheckSpec
+    checkSpec x = emptyCheckSpec { csFilename = path, csScript = x }
 
     interface :: SystemInterface IO
     interface = SystemInterface { siReadFile = defaultInterface }

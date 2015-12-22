@@ -16,14 +16,14 @@ Dir.chdir('data/wiki')
 # [String]
 paths = Dir.glob('*.md').select { |path| path =~ /SC\d{3,}.md/ }
 
-# { String => { remediation_points: Integer, content: { body: String } } }
-mapping = {}
+# { String => { String => Integer, String => { String => String } } }
+new_mapping = {}
 
 # IO ()
 paths.each do |path|
   id = path.scan(/SC\d{3,}/).join
   body = File.read(path) + notice
-  mapping[id] = {
+  new_mapping[id] = {
     'remediation_points' => 50_000,
     'content' => {
       'body' => body
@@ -34,8 +34,16 @@ end
 # IO ()
 Dir.chdir('..')
 
+# IO String
+old_mapping = YAML.load(File.read('mapping.yml'))
+
+# IO ()
+old_mapping.each do |key, val|
+  new_mapping[key]['remediation_points'] = val['remediation_points']
+end
+
 # String
-yaml = mapping.to_yaml
+yaml = new_mapping.to_yaml
 
 # IO ()
 File.open('mapping.yml', 'w') do |file|

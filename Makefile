@@ -1,3 +1,3 @@
 all:
-	./build.sh
-	./release.sh
+	./docker/build.sh
+	./docker/release.sh

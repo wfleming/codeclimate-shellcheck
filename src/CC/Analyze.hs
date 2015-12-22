@@ -1,65 +1,100 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module CC.Analyze where
 
-import CC.Types as CC
-import Control.Applicative
-import Control.Exception.Base (IOException, catch)
-import Data.Monoid            ((<>))
-import ShellCheck.Checker     (checkScript)
-import ShellCheck.Interface   (CheckResult(..)
-                             , CheckSpec(..)
-                             , Comment(..)
-                             , ErrorMessage
-                             , Position(..)
-                             , PositionedComment(..)
-                             , Severity(..)
-                             , SystemInterface(..)
-                             , emptyCheckSpec)
+import           CC.Types as CC
+import           Control.Exception.Base
+import qualified Data.Map.Strict as DM
+import           Data.Monoid
+import qualified Data.Text as T
+import           ShellCheck.Checker
+import           ShellCheck.Interface
 
--- | Main function that analyzes a list of shell scripts.
-analyzeFiles :: [FilePath] -> IO [Issue]
-analyzeFiles = fmap concat . mapM analyze
+--------------------------------------------------------------------------------
 
--- | Main function that analyzes a shell script.
-analyze :: FilePath -> IO [Issue]
-analyze x = do
-  y <- readFile x
-  z <- checkScript interface (emptyCheckSpec { csFilename = x, csScript = y })
-  return $ transform z
+-- | Main function for analyzing a shell script.
+analyze :: Env -> FilePath -> IO [Issue]
+analyze env path = do
+  shellScript <- readFile path
+  result <- checkScript interface $ checkSpec path shellScript
+  return $ fromCheckResult env result
   where
+    checkSpec :: FilePath -> String -> CheckSpec
+    checkSpec x y = emptyCheckSpec { csFilename = x, csScript = y }
+
     interface :: SystemInterface IO
     interface = SystemInterface { siReadFile = defaultInterface }
 
--- | Maps Severity to Category.
-categorise :: Severity -> Category
-categorise ErrorC   = BugRisk
-categorise InfoC    = BugRisk
-categorise StyleC   = Style
-categorise WarningC = BugRisk
+--------------------------------------------------------------------------------
 
 -- | Builds default IO interface with error handling.
 defaultInterface :: FilePath -> IO (Either ErrorMessage String)
-defaultInterface x = catch (Right <$> readFile x) handler
+defaultInterface path = catch (Right <$> readFile path) handler
   where
     handler :: IOException -> IO (Either ErrorMessage String)
     handler ex = return . Left $ show ex
 
+--------------------------------------------------------------------------------
+
+-- | The baseline remediation points value is 50,000, which is the time it takes
+-- to fix a trivial code style issue like a missing semicolon on a single line,
+-- including the time for the developer to open the code, make the change, and
+-- confidently commit the fix. All other remediation points values are expressed
+-- in multiples of that Basic Remediation Point Value.
+defaultRemediationPoints :: Integer
+defaultRemediationPoints = 50000
+
+--------------------------------------------------------------------------------
+
+-- | Maps Severity to Category.
+fromSeverity :: Severity -> Category
+fromSeverity ErrorC   = BugRisk
+fromSeverity InfoC    = BugRisk
+fromSeverity StyleC   = Style
+fromSeverity WarningC = BugRisk
+
+--------------------------------------------------------------------------------
+
 -- | Maps CheckResult into issues.
-transform :: CheckResult -> [Issue]
-transform CheckResult{..} = fmap f crComments
-  where
-    f :: PositionedComment -> Issue
-    f (PositionedComment Position{..} (Comment severity code description)) =
-      Issue {
-          _check_name         = "ShellCheck/" <> show code
-        , _description        = description
-        , _categories         = [categorise severity]
-        , _location           = Location posFile (PositionBased coords coords)
-        , _remediation_points = Nothing
-        , _content            = Nothing
+fromCheckResult :: Env -> CheckResult -> [Issue]
+fromCheckResult env CheckResult{..} = fmap (fromPositionedComment env) crComments
+
+--------------------------------------------------------------------------------
+
+-- | Maps from a PositionedComment to an Issue.
+fromPositionedComment :: Env -> PositionedComment -> Issue
+fromPositionedComment env (PositionedComment Position{..} (Comment severity code desc)) =
+  let checkName = "SC" <> T.pack (show code) in
+  let coords = Coords LineColumn { _line = posLine, _column = posColumn } in
+  let envVal = DM.lookup checkName env in
+  Issue { _check_name         = checkName
+        , _description        = description desc
+        , _categories         = categories
+        , _location           = location posFile coords
+        , _remediation_points = remediationPoints envVal
+        , _content            = content <$> envVal
         , _other_locations    = Nothing
-      }
-      where
-        coords :: CC.Position
-        coords = Coords LineColumn { _line = posLine, _column = posColumn }
+        }
+  where
+    description :: String -> T.Text
+    description = T.pack
+
+    categories :: [Category]
+    categories = [fromSeverity severity]
+
+    location :: FilePath -> CC.Position -> Location
+    location x y = Location x $ PositionBased y y
+
+    remediationPoints :: Maybe Mapping -> Maybe Integer
+    remediationPoints (Just (Mapping x _)) =
+      Just x
+    remediationPoints Nothing =
+      Just $ case severity of
+        ErrorC   -> 4 * defaultRemediationPoints
+        WarningC -> 3 * defaultRemediationPoints
+        InfoC    -> 2 * defaultRemediationPoints
+        StyleC   -> 1 * defaultRemediationPoints
+
+    content :: Mapping -> Content
+    content (Mapping _ x) = x

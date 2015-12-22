@@ -2,36 +2,46 @@
 
 module Main where
 
-import CC.Analyze
-import CC.Types
-import Control.Applicative
-import Data.Aeson           (FromJSON, decode, encode)
-import Data.Maybe           (fromMaybe)
-import Data.Monoid          ((<>))
-import System.Directory     (doesFileExist, getCurrentDirectory)
-import System.FilePath.Glob (compile, globDir)
+import           CC.Analyze
+import           CC.Types
+import           Data.Aeson
+import qualified Data.ByteString.Lazy as BSL
+import qualified Data.Map.Strict as DM
+import           Data.Maybe
+import           Data.Monoid
+import           System.Directory
+import           System.FilePath.Glob
 
-import qualified Data.ByteString.Lazy as BL
+--------------------------------------------------------------------------------
 
 main :: IO ()
 main = do
-  x <- loadConfig "/config.json"
-  y <- shFiles (_include_paths x)
-  z <- analyzeFiles y
-  mapM_ printIssue z
+  config <- loadConfig "/config.json"
+  mapping <- decode <$> BSL.readFile "data/mapping.json"
+  paths <- shFiles $ _include_paths config
+  issues <- fmap concat . mapM (analyze $ fromMaybe DM.empty mapping) $ paths
+  mapM_ printIssue issues
+
+--------------------------------------------------------------------------------
 
 loadConfig :: FilePath -> IO Config
-loadConfig x = do
-    y <- doesFileExist x
-    z <- if y then decode <$> BL.readFile x else return Nothing
-    return $ fromMaybe Config { _include_paths = ["."] } z
+loadConfig path = do
+    fileExists <- doesFileExist path
+    config <- case fileExists of
+      True  -> decode <$> BSL.readFile path
+      False -> return Nothing
+    return $ fromMaybe Config { _include_paths = ["."] } config
+
+--------------------------------------------------------------------------------
 
 printIssue :: Issue -> IO ()
-printIssue = BL.putStr . (<> "\0") . encode
+printIssue = BSL.putStr . (<> "\0") . encode
+
+--------------------------------------------------------------------------------
 
 shFiles :: [FilePath] -> IO [FilePath]
-shFiles x =
-  fmap concat $ sequence $ fmap (f . globDir [compile "**/*.sh"]) x
+shFiles paths =
+  fmap concat $ sequence $ fmap (matched . globDir [compile "**/*.sh"]) paths
   where
-    f :: Functor m => m ([[a]], [b]) -> m [a]
-    f x = (concat . fst) <$> x
+    matched :: Functor f => f ([[a]], [b]) -> f [a]
+    matched x = (concat . fst) <$> x

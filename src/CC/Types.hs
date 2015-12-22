@@ -140,7 +140,7 @@ instance FromJSON Mapping where
   parseJSON (Object x) = do
      points  <- x .: "remediation_points"
      content <- x .: "content"
-     return $ Mapping points content
+     return $! Mapping points content
   parseJSON _          = empty
 
 --------------------------------------------------------------------------------

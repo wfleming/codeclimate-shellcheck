@@ -17,8 +17,8 @@ import           ShellCheck.Interface
 analyze :: Env -> FilePath -> IO [Issue]
 analyze env path = do
   shellScript <- readFile path
-  result <- checkScript interface $ checkSpec path shellScript
-  return $ fromCheckResult env result
+  result <- checkScript interface $! checkSpec path shellScript
+  return $! fromCheckResult env result
   where
     checkSpec :: FilePath -> String -> CheckSpec
     checkSpec x y = emptyCheckSpec { csFilename = x, csScript = y }
@@ -33,7 +33,7 @@ defaultInterface :: FilePath -> IO (Either ErrorMessage String)
 defaultInterface path = catch (Right <$> readFile path) handler
   where
     handler :: IOException -> IO (Either ErrorMessage String)
-    handler ex = return . Left $ show ex
+    handler ex = return . Left $! show ex
 
 --------------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ fromPositionedComment env (PositionedComment Position{..} (Comment severity code
     coords = Coords LineColumn { _line = posLine, _column = posColumn }
 
     location :: Location
-    location = Location posFile $ PositionBased coords coords
+    location = Location posFile $! PositionBased coords coords
 
     mapping :: Maybe Mapping
     mapping = DM.lookup checkName env

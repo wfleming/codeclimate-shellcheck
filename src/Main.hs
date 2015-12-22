@@ -19,8 +19,8 @@ main :: IO ()
 main = do
   config <- loadConfig "/config.json"
   mapping <- YML.decodeFile "data/mapping.yml" :: IO (Maybe Env)
-  paths <- shFiles $ _include_paths config
-  issues <- fmap concat . mapM (analyze $ fromMaybe DM.empty mapping) $ paths
+  paths <- shFiles $! _include_paths config
+  issues <- fmap concat . mapM (analyze $! fromMaybe DM.empty mapping) $! paths
   mapM_ printIssue issues
 
 --------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ loadConfig :: FilePath -> IO Config
 loadConfig path = do
     fileExists <- doesFileExist path
     config <- if fileExists then decode <$> BSL.readFile path else return Nothing
-    return $ fromMaybe Config { _include_paths = ["."] } config
+    return $! fromMaybe Config { _include_paths = ["."] } config
 
 --------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ printIssue = BSL.putStr . (<> "\0") . encode
 
 shFiles :: [FilePath] -> IO [FilePath]
 shFiles paths =
-  fmap concat $ sequence $ fmap (matched . globDir [compile "**/*.sh"]) paths
+  fmap concat $! sequence $! fmap (matched . globDir [compile "**/*.sh"]) paths
   where
     matched :: Functor f => f ([[a]], [b]) -> f [a]
     matched x = (concat . fst) <$> x

@@ -19,6 +19,3 @@ docker run --rm -v "$PWD/.local:/root/.local"               \
                 -v "$HOME/.stack:/root/.stack"              \
                 codeclimate-shellcheck-build:latest         \
                 stack install --force-dirty
-
-# Cleanup dangling containers.
-docker rmi "$(docker images -q -f dangling=true)"

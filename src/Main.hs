@@ -51,6 +51,7 @@ shellScripts paths = do
   allScripts <- filterM validateScript $ dotShFiles ++ otherFiles
   return $ fmap clean allScripts
   where
+    dirs :: [FilePath]; otherFiles :: [FilePath]
     (dirs, otherFiles) = partition hasTrailingPathSeparator paths
 
     clean :: String -> String

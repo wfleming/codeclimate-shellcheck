@@ -4,10 +4,13 @@ module Main where
 
 import           CC.Analyze
 import           CC.Types
+import           Control.Monad
+import           Control.Monad.Extra
 import           Data.Aeson
 import           Data.Attoparsec.ByteString.Lazy
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
+import           Data.List
 import qualified Data.Map.Strict as DM
 import           Data.Maybe
 import           Data.Monoid
@@ -33,7 +36,7 @@ loadConfig :: FilePath -> IO Config
 loadConfig path = do
     fileExists <- doesFileExist path
     config <- if fileExists then decode <$> BSL.readFile path else return Nothing
-    return $! fromMaybe Config { _include_paths = ["."] } config
+    return $! fromMaybe Config { _include_paths = ["./"] } config
 
 --------------------------------------------------------------------------------
 
@@ -43,11 +46,23 @@ printIssue = BSL.putStr . (<> "\0") . encode
 --------------------------------------------------------------------------------
 
 shellScripts :: [FilePath] -> IO [FilePath]
-shellScripts paths =
-  fmap concat $! sequence $! fmap (matched . globDir [compile "**/*.sh"]) paths
+shellScripts paths = do
+  dotShFiles <- concat . fst <$> globDir patterns "."
+  otherFiles <- return files
+  allScripts <- filterM validateScript $ dotShFiles ++ otherFiles
+  return $ fmap clean allScripts
   where
-    matched :: Functor f => f ([[a]], [b]) -> f [a]
-    matched x = (concat . fst) <$> x
+    (dirs, files) = partition hasTrailingPathSeparator paths
+
+    clean :: String -> String
+    clean ('.' : '/' : x) = x
+    clean x               = x
+
+    patterns :: [Pattern]
+    patterns = fmap (compile . (++ "**/*.sh")) dirs
+
+    validateScript :: FilePath -> IO Bool
+    validateScript x = doesFileExist x &&^ isShellScript x
 
 --------------------------------------------------------------------------------
 
@@ -119,6 +134,6 @@ isShellScript path =
       _            <- string "#!"
       interpretter <- takeTill whitespace
       arguments    <- option "" $ do
-        _ <- string " "
+        _          <- string " "
         takeTill endOfLine
       return $ Shebang interpretter arguments

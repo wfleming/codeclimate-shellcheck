@@ -19,3 +19,6 @@ cabal.sandbox.config
 
 # ruby
 .ruby-version
+
+# engine
+config.json

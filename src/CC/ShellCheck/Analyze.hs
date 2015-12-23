@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module CC.Analyze where
+module CC.ShellCheck.Analyze where
 
+import           CC.ShellCheck.Types as CC
 import           CC.Types as CC
 import           Control.Exception.Base
 import qualified Data.Map.Strict as DM
@@ -14,8 +15,8 @@ import           ShellCheck.Interface
 --------------------------------------------------------------------------------
 
 -- | Main function for multiple shell scripts.
-analyzeFiles :: Env -> [FilePath] -> IO [Issue]
-analyzeFiles env = fmap concat . mapM (analyze env)
+analyzeScripts :: Env -> [FilePath] -> IO [Issue]
+analyzeScripts env = fmap concat . mapM (analyze env)
 
 --------------------------------------------------------------------------------
 

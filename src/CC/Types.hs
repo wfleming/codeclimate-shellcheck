@@ -7,6 +7,7 @@ module CC.Types where
 import           Control.Applicative
 import           Data.Aeson
 import           Data.Aeson.Types
+import qualified Data.ByteString as BS
 import qualified Data.Map.Strict as DM
 import qualified Data.Text as T
 import           GHC.Generics
@@ -148,3 +149,8 @@ instance FromJSON Mapping where
 -- | An env represents mappings between check names, content and remediation
 -- values.
 type Env = DM.Map T.Text Mapping
+
+--------------------------------------------------------------------------------
+
+-- | Represents a Linux shebang, i.e. #!interpreter [optional-arg].
+data Shebang = Shebang BS.ByteString BS.ByteString

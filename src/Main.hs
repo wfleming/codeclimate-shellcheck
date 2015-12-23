@@ -48,11 +48,10 @@ printIssue = BSL.putStr . (<> "\0") . encode
 shellScripts :: [FilePath] -> IO [FilePath]
 shellScripts paths = do
   dotShFiles <- concat . fst <$> globDir patterns "."
-  otherFiles <- return files
   allScripts <- filterM validateScript $ dotShFiles ++ otherFiles
   return $ fmap clean allScripts
   where
-    (dirs, files) = partition hasTrailingPathSeparator paths
+    (dirs, otherFiles) = partition hasTrailingPathSeparator paths
 
     clean :: String -> String
     clean ('.' : '/' : x) = x

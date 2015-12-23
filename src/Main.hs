@@ -36,7 +36,7 @@ loadConfig :: FilePath -> IO Config
 loadConfig path = do
     fileExists <- doesFileExist path
     config <- if fileExists then decode <$> BSL.readFile path else return Nothing
-    return $! fromMaybe Config { _include_paths = ["./"] } config
+    return $! fromMaybe (Config []) config
 
 --------------------------------------------------------------------------------
 

@@ -13,14 +13,16 @@ import           Test.Tasty.Hspec
 import           CC.ShellCheck.ShellScript
 import           Data.Shebang
 
+--------------------------------------------------------------------------------
+
 main :: IO ()
 main = do
   sbSpecs <- testSpec "Shebang Specs"  shebangSpecs
   ssSpecs <- testSpec "ShellScript Specs"  shellscriptSpecs
-  defaultMain (tests $ testGroup "All specs" [sbSpecs, ssSpecs])
+  defaultMain (tests $ testGroup "All specs" [ sbSpecs, ssSpecs ])
 
 tests :: TestTree -> TestTree
-tests specs = testGroup "Engine Tests" [specs]
+tests specs = testGroup "Engine Tests" [ specs ]
 
 --------------------------------------------------------------------------------
 
@@ -140,6 +142,22 @@ shellscriptSpecs = describe "Shellscript validation and retrieval" $ do
       let subject' = Shebang (Interpretter "/bin/env") (Just (Argument "ruby"))
       let result' = hasValidInterpretter subject'
       result' `shouldBe` False
+
+  describe "findShellScripts" $ do
+    describe "when i specify absolute file paths" $ do
+      it "should filter out scripts that aren't shell scripts" $ do
+        let subject = [ "fixtures/example"
+                      , "fixtures/example.sh"
+                      , "fixtures/example.rb"
+                      ]
+        result <- findShellScripts subject
+        result `shouldBe` [ "fixtures/example", "fixtures/example.sh" ]
+
+    describe "when i specify a directory" $ do
+      it "should should only give me files that end with .sh" $ do
+        let subject = [ "fixtures/" ]
+        result <- findShellScripts subject
+        result `shouldBe` [ "fixtures/example.sh" ]
 
 --------------------------------------------------------------------------------
 

@@ -10,6 +10,8 @@ module Data.Shebang (
   , readFirstLine
   -- * Core types
   , Shebang(..)
+  , Interpretter(..)
+  , Argument(..)
 ) where
 
 import           Data.Attoparsec.ByteString.Lazy
@@ -19,8 +21,17 @@ import           Data.Word
 
 --------------------------------------------------------------------------------
 
+-- | Newtype wrapper for Interpretter.
+newtype Interpretter = Interpretter { _interpretter :: BS.ByteString }
+  deriving (Eq, Show)
+
+-- | Newtype wrapper for argument.
+newtype Argument = Argument { _argument :: BS.ByteString }
+  deriving (Eq, Show)
+
 -- | Value representing a Shebang of the form #!interpreter [optional-arg].
-data Shebang = Shebang BS.ByteString BS.ByteString
+data Shebang = Shebang Interpretter (Maybe Argument)
+  deriving (Eq, Show)
 
 --------------------------------------------------------------------------------
 
@@ -54,11 +65,13 @@ decodeEither = eitherResult . parse shebang
 shebang :: Parser Shebang
 shebang = do
   _            <- string "#!"
-  interpretter <- takeTill whitespace
-  arguments    <- option "" $ do
+  interpretter <- takeTill (\x -> whitespace x || endOfLine x)
+  argument     <- option "" $ do
     _          <- string " "
     takeTill endOfLine
-  return $ Shebang interpretter arguments
+  return $! case argument of
+    "" -> Shebang (Interpretter interpretter) Nothing
+    x  -> Shebang (Interpretter interpretter) (Just (Argument x))
 
 ----------------------------------------------------------------------------
 

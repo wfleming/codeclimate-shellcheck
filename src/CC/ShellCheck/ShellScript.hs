@@ -12,7 +12,7 @@ module CC.ShellCheck.ShellScript (
 import           Control.Monad.Extra
 import qualified Data.ByteString as BS
 import           Data.List
-import           Data.Shebang (Shebang(..))
+import           Data.Shebang (Shebang(..), Interpretter(..), Argument(..))
 import qualified Data.Shebang as Shebang
 import           System.Directory
 import           System.FilePath.Glob
@@ -28,10 +28,12 @@ hasShellExtension path = takeExtension path == ".sh"
 
 -- | Checks to see if script has a valid interpretter.
 hasValidInterpretter :: Shebang -> Bool
-hasValidInterpretter (Shebang interpretter arguments) =
-  if BS.isSuffixOf "env" interpretter
-    then any (`BS.isPrefixOf` arguments) shellScriptWhitelist
-    else any (`BS.isSuffixOf` interpretter) shellScriptWhitelist
+hasValidInterpretter (Shebang (Interpretter int) maybeArgument) =
+  if BS.isSuffixOf "env" int
+    then case maybeArgument of
+      Nothing             -> False
+      Just (Argument arg) -> any (`BS.isPrefixOf` arg) shellScriptWhitelist
+    else any (`BS.isSuffixOf` int) shellScriptWhitelist
   where
     shellScriptWhitelist :: [BS.ByteString]
     shellScriptWhitelist = ["sh", "ash", "dash", "bash", "ksh"]

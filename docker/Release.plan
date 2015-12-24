@@ -9,7 +9,7 @@ WORKDIR /home/app
 
 COPY src /home/app/src
 COPY LICENSE /home/app/LICENSE
-ADD .local/bin/engine /home/app/bin/engine
+ADD .local/bin/codeclimate-shellcheck /home/app/bin/engine
 
 VOLUME /code
 WORKDIR /code

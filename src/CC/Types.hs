@@ -7,8 +7,6 @@ module CC.Types where
 import           Control.Applicative
 import           Data.Aeson
 import           Data.Aeson.Types
-import qualified Data.ByteString as BS
-import qualified Data.Map.Strict as DM
 import qualified Data.Text as T
 import           GHC.Generics
 
@@ -131,26 +129,3 @@ data Config = Config { _include_paths :: ![FilePath] } deriving (Generic, Show)
 
 instance FromJSON Config where
   parseJSON = genericParseJSON defaultOptions { fieldLabelModifier = drop 1 }
-
---------------------------------------------------------------------------------
-
--- | A mapping represents remediation points and associated textual content.
-data Mapping = Mapping Int Content deriving Show
-
-instance FromJSON Mapping where
-  parseJSON (Object x) = do
-     points  <- x .: "remediation_points"
-     content <- x .: "content"
-     return $! Mapping points content
-  parseJSON _          = empty
-
---------------------------------------------------------------------------------
-
--- | An env represents mappings between check names, content and remediation
--- values.
-type Env = DM.Map T.Text Mapping
-
---------------------------------------------------------------------------------
-
--- | Represents a Linux shebang, i.e. #!interpreter [optional-arg].
-data Shebang = Shebang BS.ByteString BS.ByteString

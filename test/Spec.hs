@@ -10,58 +10,138 @@ import           System.IO.Temp
 import           Test.Tasty
 import           Test.Tasty.Hspec
 
+import           CC.ShellCheck.ShellScript
 import           Data.Shebang
 
 main :: IO ()
 main = do
   sbSpecs <- testSpec "Shebang Specs"  shebangSpecs
-  defaultMain (tests $ testGroup "All specs" [sbSpecs])
+  ssSpecs <- testSpec "ShellScript Specs"  shellscriptSpecs
+  defaultMain (tests $ testGroup "All specs" [sbSpecs, ssSpecs])
 
 tests :: TestTree -> TestTree
 tests specs = testGroup "Engine Tests" [specs]
+
+--------------------------------------------------------------------------------
+
+shebang :: BSL.ByteString
+shebang = "#!/bin/sh"
+
+shScript :: BSL.ByteString
+shScript = [s|#!/bin/sh
+            echo "hello world"|]
+
+rbScript :: BSL.ByteString
+rbScript = [s|#!/bin/env ruby
+            puts "hello world"|]
+
+--------------------------------------------------------------------------------
 
 shebangSpecs :: Spec
 shebangSpecs = describe "Shebang parsing" $ do
   describe "decode" $ do
     it "should parse a valid shebang without optional args" $ do
-      let subject = [s|#!/bin/sh
-                       echo "hello world"|]
+      let subject = shScript
       let result = decode subject
       result `shouldBe` Just (Shebang (Interpretter "/bin/sh") Nothing)
 
     it "should parse a valid shebang with optional args" $ do
-      let subject = [s|#!/bin/env ruby
-                       puts "hello world"|]
+      let subject = rbScript
       let result = decode subject
       result `shouldBe` Just (Shebang (Interpretter "/bin/env") (Just (Argument "ruby")))
 
   describe "decodeEither" $ do
     it "should parse a valid shebang without optional args" $ do
-      let subject = [s|#!/bin/sh
-                       echo "hello world"|]
+      let subject = shScript
       let result = decodeEither subject
       result `shouldBe` Right (Shebang (Interpretter "/bin/sh") Nothing)
 
   describe "hasShebang" $ do
     it "should be able to detect a valid shebang" $ do
-      let subject = "#!/bin/sh"
+      let subject = shebang
       let result = hasShebang subject
       result `shouldBe` True
 
-    it "should be able to detect an invalid shebang" $ do
-      let subject = ""
+    it "should be able to detect when shebang is missing" $ do
+      let subject = BSL.empty
       let result = hasShebang subject
       result `shouldBe` False
 
   describe "readFirstLine" $ do
     it "should only read the first line" $ do
-      let contents = [s|#!/bin/sh
-                        echo "hello world"|]
+      let contents = shScript
       withinTempDir $ do
         let subject = "example.sh"
         createFile subject contents
         result <- readFirstLine subject
-        result `shouldBe` "#!/bin/sh"
+        result `shouldBe` shebang
+
+--------------------------------------------------------------------------------
+
+shellscriptSpecs :: Spec
+shellscriptSpecs = describe "Shellscript validation and retrieval" $ do
+  describe "isShellScript" $ do
+    it "should be valid if file has .sh extension" $ do
+      withinTempDir $ do
+        let subject = "example.sh"
+        createFile subject BSL.empty
+        result <- isShellScript subject
+        result `shouldBe` True
+
+    it "should be valid if file has no extension but a valid shebang" $ do
+      withinTempDir $ do
+        let subject = "example"
+        createFile subject shScript
+        result <- isShellScript subject
+        result `shouldBe` True
+
+    it "should not be valid if file has no extension and an invalid shebang" $ do
+      withinTempDir $ do
+        let subject = "example"
+        createFile subject rbScript
+        result <- isShellScript subject
+        result `shouldBe` False
+
+  describe "hasShellExtension" $ do
+    it "should be valid if file has .sh extension" $ do
+      let subject = "example.sh"
+      let result = hasShellExtension subject
+      result `shouldBe` True
+
+    it "should not be valid if file has no extension" $ do
+      let subject = "example"
+      let result = hasShellExtension subject
+      result `shouldBe` False
+
+  describe "hasValidInterpretter" $ do
+    it "should be valid if sh is interpretter" $ do
+      let subject = Shebang (Interpretter "/bin/sh") Nothing
+      let result = hasValidInterpretter subject
+      result `shouldBe` True
+
+      let subject' = Shebang (Interpretter "/bin/env") (Just (Argument "sh"))
+      let result' = hasValidInterpretter subject'
+      result' `shouldBe` True
+
+    it "should be valid if bash is interpretter" $ do
+      let subject = Shebang (Interpretter "/bin/bash") Nothing
+      let result = hasValidInterpretter subject
+      result `shouldBe` True
+
+      let subject' = Shebang (Interpretter "/bin/env") (Just (Argument "bash"))
+      let result' = hasValidInterpretter subject'
+      result' `shouldBe` True
+
+    it "should be not be valid if ruby is interpretter" $ do
+      let subject = Shebang (Interpretter "/bin/ruby") Nothing
+      let result = hasValidInterpretter subject
+      result `shouldBe` False
+
+      let subject' = Shebang (Interpretter "/bin/env") (Just (Argument "ruby"))
+      let result' = hasValidInterpretter subject'
+      result' `shouldBe` False
+
+--------------------------------------------------------------------------------
 
 withinTempDir :: IO a -> IO a
 withinTempDir act = withSystemTempDirectory "cc-hlint" $ \tmp -> do

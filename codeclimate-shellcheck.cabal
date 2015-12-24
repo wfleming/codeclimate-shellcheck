@@ -65,10 +65,13 @@ test-suite codeclimate-shellcheck-test
     , aeson
     , aeson-qq
     , bytestring
+    , directory
+    , filepath
     , string-qq
     , tasty
     , tasty-hspec
     , tasty-hunit
+    , temporary
     , hspec
   hs-source-dirs: test
   ghc-options: -Wall

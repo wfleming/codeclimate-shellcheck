@@ -91,7 +91,7 @@ fromPositionedComment env (PositionedComment Position{..} (Comment severity code
     categories = [fromSeverity severity]
 
     coords :: CC.Position
-    coords = Coords LineColumn { _line = posLine, _column = posColumn }
+    coords = Coords (LineColumn (fromIntegral posLine) (fromIntegral posColumn))
 
     location :: Location
     location = Location posFile $! PositionBased coords coords

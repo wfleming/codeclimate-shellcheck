@@ -30,8 +30,8 @@ instance ToJSON Category where
 
 -- | Line and column numbers are 1-based.
 data LineColumn = LineColumn {
-    _line   :: !Integer
-  , _column :: !Integer
+    _line   :: !Int
+  , _column :: !Int
 } deriving (Generic, Show)
 
 instance ToJSON LineColumn where

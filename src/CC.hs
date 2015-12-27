@@ -21,7 +21,7 @@ import           System.Directory
 -- | Load config from CodeClimate engine path or use a default.
 loadConfig :: IO Config
 loadConfig = do
-  let path = "./config.json"
+  path <- getCurrentDirectory >>= \cwd -> return (cwd ++ "/config.json")
   fileExists <- doesFileExist path
   config <- if fileExists
               then decode <$> BSL.readFile path

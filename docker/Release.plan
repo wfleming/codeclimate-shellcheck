@@ -10,8 +10,8 @@ WORKDIR /home/app
 COPY src /home/app/src
 COPY LICENSE /home/app/LICENSE
 ADD .local/bin/codeclimate-shellcheck /home/app/bin/engine
+ADD data/env.yml /home/app/env.yml
 
 VOLUME /code
 WORKDIR /code
-
-ENTRYPOINT ["/home/app/bin/engine"]
+ENTRYPOINT ["/home/app/bin/engine", "--config", "/config.json", "--env", "/home/app/env.yml"]

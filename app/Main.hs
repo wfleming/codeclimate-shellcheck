@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Main where
 
 import CC
@@ -7,13 +9,27 @@ import CC.ShellCheck.ShellScript
 import CC.ShellCheck.Types
 import Control.Concurrent
 import Control.Monad
+import Data.Maybe
+import Options.Applicative
 
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = do
-  config  <- loadConfig
-  env     <- loadEnv
+main = execParser opts >>= runCli
+  where
+    opts :: ParserInfo CLIOpts
+    opts = info (helper <*> cliOpts)
+             (fullDesc
+              <> progDesc "Print ShellCheck results as CodeClimate JSON"
+              <> header "codeclimate-shellcheck - codeclimate shellcheck engine")
+
+--------------------------------------------------------------------------------
+
+-- | Takes CLIOpts options and runs the main program.
+runCli :: CLIOpts -> IO ()
+runCli CLIOpts{..} = do
+  config  <- loadConfig (fromMaybe "./config.json" configPath)
+  env     <- loadEnv (fromMaybe "./data/env.yml" envPath)
   scripts <- findShellScripts $! _include_paths config
   chan0   <- newChan
   chan1   <- dupChan chan0
@@ -27,6 +43,22 @@ main = do
       case analysis of
         Reported     -> return ()
         _            -> waitUntilReported chan
+
+--------------------------------------------------------------------------------
+
+-- | Represents arguments that can be passed to CLIOpts.
+data CLIOpts = CLIOpts { configPath :: Maybe FilePath
+               , envPath :: Maybe FilePath
+               }
+
+--------------------------------------------------------------------------------
+
+-- | Parses CLIOpts.
+cliOpts :: Parser CLIOpts
+cliOpts = CLIOpts <$> optional (strOption (long "config"
+                                           <> help "Location of engine config"))
+                  <*> optional (strOption (long "env"
+                                           <> help "Location of engine data mapping"))
 
 --------------------------------------------------------------------------------
 

@@ -50,6 +50,7 @@ executable codeclimate-shellcheck
   build-depends:
       base >= 4.7 && <= 5
     , codeclimate-shellcheck
+    , optparse-applicative
   hs-source-dirs: app
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   default-language: Haskell2010

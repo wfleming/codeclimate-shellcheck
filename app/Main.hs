@@ -7,6 +7,7 @@ import CC.ShellCheck.Analyze
 import CC.ShellCheck.Env
 import CC.ShellCheck.ShellScript
 import CC.ShellCheck.Types
+import CLI
 import Control.Concurrent
 import Control.Monad
 import Data.Maybe
@@ -15,13 +16,7 @@ import Options.Applicative
 --------------------------------------------------------------------------------
 
 main :: IO ()
-main = execParser opts >>= runCli
-  where
-    opts :: ParserInfo CLIOpts
-    opts = info (helper <*> cliOpts)
-             (fullDesc
-              <> progDesc "Print ShellCheck results as CodeClimate JSON"
-              <> header "codeclimate-shellcheck - codeclimate shellcheck engine")
+main = execParser cliOpts >>= runCli
 
 --------------------------------------------------------------------------------
 
@@ -43,22 +38,6 @@ runCli CLIOpts{..} = do
       case analysis of
         Reported     -> return ()
         _            -> waitUntilReported chan
-
---------------------------------------------------------------------------------
-
--- | Represents arguments that can be passed to CLIOpts.
-data CLIOpts = CLIOpts { configPath :: Maybe FilePath
-               , envPath :: Maybe FilePath
-               }
-
---------------------------------------------------------------------------------
-
--- | Parses CLIOpts.
-cliOpts :: Parser CLIOpts
-cliOpts = CLIOpts <$> optional (strOption (long "config"
-                                           <> help "Location of engine config"))
-                  <*> optional (strOption (long "env"
-                                           <> help "Location of engine data mapping"))
 
 --------------------------------------------------------------------------------
 

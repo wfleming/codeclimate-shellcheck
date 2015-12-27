@@ -30,8 +30,8 @@ instance ToJSON Category where
 
 -- | Line and column numbers are 1-based.
 data LineColumn = LineColumn {
-    _line   :: !Int
-  , _column :: !Int
+    _line   :: {-# UNPACK #-} !Int
+  , _column :: {-# UNPACK #-} !Int
 } deriving (Generic, Show)
 
 instance ToJSON LineColumn where
@@ -41,9 +41,9 @@ instance ToJSON LineColumn where
 
 -- | Positions refer to specific characters within a source file, and can be
 -- expressed in two ways.
-data Position = Coords LineColumn
+data Position = Coords !LineColumn
                 -- ^ Line and column coordinates.
-              | Offset Int
+              | Offset {-# UNPACK #-} !Int
                 -- ^ Absolute character offsets, for the entire source buffer.
               deriving Show
 
@@ -56,7 +56,7 @@ instance ToJSON Position where
 -- | Line-based locations emit a beginning and end line number for the issue,
 -- whereas position-based locations allow more precision.
 data BeginEnd = PositionBased Position Position
-              | LineBased Int Int
+              | LineBased {-# UNPACK #-} !Int {-# UNPACK #-} !Int
               deriving Show
 
 instance ToJSON BeginEnd where

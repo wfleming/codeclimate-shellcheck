@@ -62,10 +62,10 @@ analyzer env paths chan = do
     -- Source: Parallel and Concurrent Programming in Haskell
     --         MVar as a Building Block: Unbounded Channels, p135
     writeChanAndForce :: Issue -> IO ()
-    writeChanAndForce result = do
-      let cmd = Result result
-      writeChan chan cmd
-      seq cmd (return ())
+    writeChanAndForce issue = do
+      let result = Result issue
+      writeChan chan result
+      seq result (return ())
 
 --------------------------------------------------------------------------------
 

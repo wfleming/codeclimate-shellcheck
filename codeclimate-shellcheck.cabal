@@ -47,6 +47,8 @@ library
 executable codeclimate-shellcheck
   main-is:
     Main.hs
+  other-modules:
+    CLI
   build-depends:
       base >= 4.7 && <= 5
     , codeclimate-shellcheck

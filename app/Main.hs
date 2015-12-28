@@ -28,9 +28,10 @@ runCli CLIOpts{..} = do
   scripts <- findShellScripts $! _include_paths config
   chan0   <- newChan
   chan1   <- dupChan chan0
-  _       <- forkIO (reporter chan0)
+  chan2   <- dupChan chan0
+  _       <- forkIO (reporter chan1)
   _       <- forkIO (analyzer env scripts chan0)
-  waitUntilReported chan1
+  waitUntilReported chan2
   where
     waitUntilReported :: Chan Analysis -> IO ()
     waitUntilReported chan = do

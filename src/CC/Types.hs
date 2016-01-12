@@ -78,7 +78,7 @@ instance ToJSON Location where
     LineBased _ _     -> [ f x, "lines" .= y ]
     where
       f :: FilePath -> Pair
-      f = (.=) "path"
+      f p = "path" .= T.stripPrefix "./" (T.pack p)
 
 --------------------------------------------------------------------------------
 

@@ -7,6 +7,8 @@ module CC.Types where
 import           Control.Applicative
 import           Data.Aeson
 import           Data.Aeson.Types
+import           Data.Maybe (fromMaybe)
+import           Data.Text (Text)
 import qualified Data.Text as T
 import           GHC.Generics
 
@@ -78,7 +80,12 @@ instance ToJSON Location where
     LineBased _ _     -> [ f x, "lines" .= y ]
     where
       f :: FilePath -> Pair
-      f p = "path" .= T.stripPrefix "./" (T.pack p)
+      f p = "path" .= stripPrefix "./" (T.pack p)
+
+      -- A version that doesn't return Maybe but gives back the original value
+      -- if the prefix wasn't present.
+      stripPrefix :: Text -> Text -> Text
+      stripPrefix p fp = fromMaybe fp $ T.stripPrefix p fp
 
 --------------------------------------------------------------------------------
 

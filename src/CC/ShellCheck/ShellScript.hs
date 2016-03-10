@@ -68,7 +68,7 @@ findShellScripts paths = do
     clean x = x
 
     patterns :: [Pattern]
-    patterns = fmap (compile . (++ "**/*.sh")) dirs
+    patterns = fmap (compile . (++ "**/*")) dirs
 
     validateScript :: FilePath -> IO Bool
     validateScript x = doesFileExist x &&^ isShellScript x

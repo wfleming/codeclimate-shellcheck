@@ -154,10 +154,10 @@ shellscriptSpecs = describe "Shellscript validation and retrieval" $ do
         result `shouldBe` [ "test/fixtures/example", "test/fixtures/example.sh" ]
 
     describe "when i specify a list of directories" $ do
-      it "should should only give me files that end with .sh" $ do
+      it "should give me all shell script files, regardless of extension" $ do
         let subject = [ "test/fixtures/" ]
         result <- findShellScripts subject
-        result `shouldBe` [ "test/fixtures/example.sh" ]
+        result `shouldBe` [ "test/fixtures/example", "test/fixtures/example.sh" ]
 
 --------------------------------------------------------------------------------
 

@@ -1,6 +1,8 @@
 FROM progrium/busybox
 MAINTAINER Philip Cunningham <hello@filib.io>
 
+ENV LANG en_US.UTF-8
+
 ADD .local/libgmp.so.10 /usr/lib/libgmp.so.10
 
 RUN adduser -u 9000 -h /home/app -D app

@@ -5,3 +5,6 @@ engines:
     enabled: true
   shellcheck:
     enabled: true
+ratings:
+  paths:
+    - "**.hs"

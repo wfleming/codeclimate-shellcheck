@@ -1,9 +1,15 @@
-FROM progrium/busybox
+FROM alpine:3.3
 MAINTAINER Philip Cunningham <hello@filib.io>
 
-ENV LANG en_US.UTF-8
+ADD docker/files/ .
+RUN apk --allow-untrusted --update add \
+    glibc-2.23-r1.apk \
+    glibc-bin-2.23-r1.apk \
+    glibc-i18n-2.23-r1.apk \
+    gmp && \
+  /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8
 
-ADD .local/libgmp.so.10 /usr/lib/libgmp.so.10
+ENV LANG en_US.UTF-8
 
 RUN adduser -u 9000 -h /home/app -D app
 USER app

@@ -12,11 +12,6 @@ build:
 	  --tag $(IMAGE_NAME)-build \
 	  --file $(PWD)/docker/Build.plan .
 
-.local/libgmp.so.10: build
-	docker run --rm \
-	  --volume $(PWD)/.local:/root/.local \
-	  $(IMAGE_NAME)-build cp /usr/lib/x86_64-linux-gnu/libgmp.so.10 /root/.local
-
 .local/bin/codeclimate-shellcheck: build
 	docker run --rm \
 	  --volume $(PWD)/.local/bin:/root/.local/bin \
@@ -29,7 +24,7 @@ compress: .local/bin/codeclimate-shellcheck
 	  --volume $(PWD)/.local/bin:/data \
 	  lalyos/upx codeclimate-shellcheck
 
-image: .local/libgmp.so.10 .local/bin/codeclimate-shellcheck data/env.yml
+image: .local/bin/codeclimate-shellcheck data/env.yml
 	docker build \
 	  --tag $(IMAGE_NAME) \
 	  --file $(PWD)/docker/Release.plan .

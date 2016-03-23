@@ -3,6 +3,7 @@
 
 module CC.ShellCheck.Analyze where
 
+import           CC.ShellCheck.Fingerprint
 import           CC.ShellCheck.Types as CC
 import           CC.Types as CC
 import           Control.Exception.Base
@@ -19,7 +20,7 @@ analyze :: Env -> FilePath -> IO [Issue]
 analyze env path = do
   shellScript <- readFile path
   result <- checkScript interface $! checkSpec shellScript
-  return $! fromCheckResult env result
+  return $! fromCheckResult env result shellScript
   where
     checkSpec :: String -> CheckSpec
     checkSpec x = emptyCheckSpec { csFilename = path, csScript = x }
@@ -58,14 +59,14 @@ fromSeverity WarningC = BugRisk
 --------------------------------------------------------------------------------
 
 -- | Maps CheckResult into issues.
-fromCheckResult :: Env -> CheckResult -> [Issue]
-fromCheckResult env CheckResult{..} = fmap (fromPositionedComment env) crComments
+fromCheckResult :: Env -> CheckResult -> String -> [Issue]
+fromCheckResult env CheckResult{..} shellScript = fmap (fromPositionedComment env shellScript) crComments
 
 --------------------------------------------------------------------------------
 
 -- | Maps from a PositionedComment to an Issue.
-fromPositionedComment :: Env -> PositionedComment -> Issue
-fromPositionedComment env (PositionedComment Position{..} (Comment severity code desc)) =
+fromPositionedComment :: Env -> String -> PositionedComment -> Issue
+fromPositionedComment env shellScript p@(PositionedComment Position{..} (Comment severity code desc)) =
   Issue { _check_name         = checkName
         , _description        = description
         , _categories         = categories
@@ -73,6 +74,7 @@ fromPositionedComment env (PositionedComment Position{..} (Comment severity code
         , _remediation_points = remediationPoints
         , _content            = content
         , _other_locations    = Nothing
+        , _fingerprint        = issueFingerprint p $ T.pack shellScript
         }
   where
     checkName :: T.Text

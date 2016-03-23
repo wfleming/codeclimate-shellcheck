@@ -13,13 +13,16 @@ import           Test.Tasty.Hspec
 import           CC.ShellCheck.ShellScript
 import           Data.Shebang
 
+import           CC.ShellCheck.FingerprintSpec (fingerprintSpecs)
+
 --------------------------------------------------------------------------------
 
 main :: IO ()
 main = do
   sbSpecs <- testSpec "Shebang Specs"  shebangSpecs
   ssSpecs <- testSpec "ShellScript Specs"  shellscriptSpecs
-  defaultMain (tests $ testGroup "All specs" [ sbSpecs, ssSpecs ])
+  fpSpecs <- testSpec "Fingerprint Specs" fingerprintSpecs
+  defaultMain (tests $ testGroup "All specs" [ sbSpecs, ssSpecs, fpSpecs ])
 
 tests :: TestTree -> TestTree
 tests specs = testGroup "Engine Tests" [ specs ]

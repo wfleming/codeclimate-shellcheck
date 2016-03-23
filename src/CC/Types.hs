@@ -112,6 +112,7 @@ data Issue = Issue {
   , _remediation_points :: !(Maybe Int)
   , _content            :: !(Maybe Content)
   , _other_locations    :: !(Maybe [Location])
+  , _fingerprint        :: !T.Text
 } deriving Show
 
 instance ToJSON Issue where
@@ -124,6 +125,7 @@ instance ToJSON Issue where
       , "remediation_points" .= _remediation_points
       , "content"            .= _content
       , "other_locations"    .= _other_locations
+      , "fingerprint"        .= _fingerprint
     ]
     where
       withoutNulls :: [(a, Value)] -> [(a, Value)]

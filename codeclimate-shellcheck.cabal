@@ -23,6 +23,7 @@ library
     CC
     CC.ShellCheck.Analyze
     CC.ShellCheck.Env
+    CC.ShellCheck.Fingerprint
     CC.ShellCheck.ShellScript
     CC.ShellCheck.Types
     CC.Types
@@ -37,6 +38,7 @@ library
     , extra
     , filepath
     , Glob
+    , pureMD5
     , ShellCheck
     , text
     , yaml
@@ -70,10 +72,12 @@ test-suite codeclimate-shellcheck-test
     , bytestring
     , directory
     , filepath
+    , ShellCheck
     , string-qq
     , tasty
     , tasty-hspec
     , tasty-hunit
+    , text
     , temporary
     , hspec
   hs-source-dirs: test

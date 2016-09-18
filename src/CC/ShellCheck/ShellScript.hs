@@ -22,7 +22,7 @@ import           System.FilePath.Posix
 
 -- | Checks to see if file has correct extension.
 hasShellExtension :: FilePath -> Bool
-hasShellExtension path = takeExtension path == ".sh" || takeExtension path == ".bash" || takeExtension path == ".zsh"
+hasShellExtension path = takeExtension path == ".sh" || takeExtension path == ".bash" || takeExtension path == ".dash" || takeExtension path == ".ksh" || takeExtension path == ".ash"
 
 --------------------------------------------------------------------------------
 

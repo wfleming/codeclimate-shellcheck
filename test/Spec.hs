@@ -113,6 +113,26 @@ shellscriptSpecs = describe "Shellscript validation and retrieval" $ do
       let result = hasShellExtension subject
       result `shouldBe` True
 
+    it "should be valid if file has .ash extension" $ do
+      let subject = "example.ash"
+      let result = hasShellExtension subject
+      result `shouldBe` True
+
+    it "should be valid if file has .dash extension" $ do
+      let subject = "example.dash"
+      let result = hasShellExtension subject
+      result `shouldBe` True
+
+    it "should be valid if file has .bash extension" $ do
+      let subject = "example.bash"
+      let result = hasShellExtension subject
+      result `shouldBe` True
+
+    it "should be valid if file has .ksh extension" $ do
+      let subject = "example.ksh"
+      let result = hasShellExtension subject
+      result `shouldBe` True
+
     it "should not be valid if file has no extension" $ do
       let subject = "example"
       let result = hasShellExtension subject

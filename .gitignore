@@ -16,6 +16,7 @@ cabal.sandbox.config
 *.hp
 .stack-work/
 .local/
+TAGS
 
 # ruby
 .ruby-version

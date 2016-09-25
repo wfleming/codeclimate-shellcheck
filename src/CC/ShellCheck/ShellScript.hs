@@ -11,7 +11,9 @@ module CC.ShellCheck.ShellScript (
 
 import           Control.Monad.Extra
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as Char8
 import           Data.List
+import           Data.Monoid
 import           Data.Shebang (Shebang(..), Interpretter(..), Argument(..))
 import qualified Data.Shebang as Shebang
 import           System.Directory
@@ -20,9 +22,24 @@ import           System.FilePath.Posix
 
 --------------------------------------------------------------------------------
 
+-- | List of shells the engine should be able to handle.
+validShells :: [BS.ByteString]
+validShells = ["sh", "ash", "dash", "bash", "ksh"]
+
+--------------------------------------------------------------------------------
+
+-- | List of valid shell file extensions.
+validShellExtensions :: [BS.ByteString]
+validShellExtensions = ("." <>) <$> validShells
+
+--------------------------------------------------------------------------------
+
 -- | Checks to see if file has correct extension.
 hasShellExtension :: FilePath -> Bool
-hasShellExtension path = takeExtension path == ".sh"
+hasShellExtension path = extension `elem` validShellExtensions
+  where
+    extension :: BS.ByteString
+    extension = Char8.pack $ takeExtension path
 
 --------------------------------------------------------------------------------
 
@@ -32,11 +49,8 @@ hasValidInterpretter (Shebang (Interpretter int) maybeArgument) =
   if BS.isSuffixOf "env" int
     then case maybeArgument of
       Nothing             -> False
-      Just (Argument arg) -> any (`BS.isPrefixOf` arg) shellScriptWhitelist
-    else any (`BS.isSuffixOf` int) shellScriptWhitelist
-  where
-    shellScriptWhitelist :: [BS.ByteString]
-    shellScriptWhitelist = ["sh", "ash", "dash", "bash", "ksh"]
+      Just (Argument arg) -> any (`BS.isPrefixOf` arg) validShells
+    else any (`BS.isSuffixOf` int) validShells
 
 --------------------------------------------------------------------------------
 

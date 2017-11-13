@@ -62,6 +62,8 @@ executable codeclimate-shellcheck
 test-suite codeclimate-shellcheck-test
   main-is:
     Spec.hs
+  other-modules:
+    CC.ShellCheck.FingerprintSpec
   type: exitcode-stdio-1.0
 
   build-depends:

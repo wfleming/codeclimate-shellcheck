@@ -22,7 +22,7 @@ import qualified Data.Text as T
 -- | Given a positioned comment and the file's contents, generate a fingerprint
 --   unique to that issue
 issueFingerprint :: PositionedComment -> Text -> Text
-issueFingerprint (PositionedComment Position{..} (Comment _ code _)) script =
+issueFingerprint (PositionedComment Position{..} _ (Comment _ code _)) script =
     md5 $ T.intercalate "|"
         [ T.pack $ posFile
         , T.pack $ show code

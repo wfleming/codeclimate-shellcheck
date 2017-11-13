@@ -71,7 +71,11 @@ fingerprintSpecs = describe "issueFingerprint" $ do
         fp1 `shouldBe` fp2
 
 fingerprint :: Integer -> Code -> Text -> Text
-fingerprint ln code = issueFingerprint $ PositionedComment (position ln) (comment code)
+fingerprint ln code =
+  issueFingerprint $ PositionedComment (position ln) unused (comment code)
+  where
+    unused :: a
+    unused = error "end position comment not implemented"
 
 position :: Integer -> Position
 position ln = Position

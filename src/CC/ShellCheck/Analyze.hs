@@ -66,7 +66,7 @@ fromCheckResult env CheckResult{..} shellScript = fmap (fromPositionedComment en
 
 -- | Maps from a PositionedComment to an Issue.
 fromPositionedComment :: Env -> String -> PositionedComment -> Issue
-fromPositionedComment env shellScript p@(PositionedComment Position{..} (Comment severity code desc)) =
+fromPositionedComment env shellScript p@(PositionedComment Position{..} _ (Comment severity code desc)) =
   Issue { _check_name         = checkName
         , _description        = description
         , _categories         = categories

@@ -1,7 +1,7 @@
 # Code Climate ShellCheck Engine
 
 [![Code Climate](https://codeclimate.com/github/filib/codeclimate-shellcheck/badges/gpa.svg)](https://codeclimate.com/github/filib/codeclimate-shellcheck)
-[![Build Status](https://travis-ci.org/filib/codeclimate-shellcheck.svg?branch=master)](https://travis-ci.org/filib/codeclimate-shellcheck)
+[![Build Status](https://travis-ci.org/mcfilib/codeclimate-shellcheck.svg?branch=master)](https://travis-ci.org/mcfilib/codeclimate-shellcheck)
 
 `codeclimate-shellcheck` is a Code Climate engine that wraps
 [ShellCheck](http://www.shellcheck.net/). You can run it on your

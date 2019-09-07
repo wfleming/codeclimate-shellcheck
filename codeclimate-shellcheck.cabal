@@ -39,7 +39,7 @@ library
     , filepath
     , Glob
     , pureMD5
-    , ShellCheck
+    , ShellCheck == 0.7.0
     , text
     , yaml
   hs-source-dirs: src

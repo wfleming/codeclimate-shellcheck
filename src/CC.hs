@@ -13,7 +13,6 @@ import           CC.Types
 import           Data.Aeson
 import qualified Data.ByteString.Lazy as BSL
 import           Data.Maybe
-import           Data.Monoid
 import           System.Directory
 
 --------------------------------------------------------------------------------

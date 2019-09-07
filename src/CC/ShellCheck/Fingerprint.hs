@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module CC.ShellCheck.Fingerprint
     ( issueFingerprint
@@ -22,12 +21,16 @@ import qualified Data.Text as T
 -- | Given a positioned comment and the file's contents, generate a fingerprint
 --   unique to that issue
 issueFingerprint :: PositionedComment -> Text -> Text
-issueFingerprint (PositionedComment Position{..} _ (Comment _ code _)) script =
+issueFingerprint pc script =
     md5 $ T.intercalate "|"
-        [ T.pack $ posFile
+        [ T.pack $ posFile pos
         , T.pack $ show code
-        , T.filter (not . isSpace) $ fetchLine (fromIntegral posLine) script
+        , T.filter (not . isSpace) $ fetchLine (fromIntegral $ posLine pos) script
         ]
+  where
+    pos = pcStartPos pc
+    comment = pcComment pc
+    code = cCode comment
 
 md5 :: Text -> Text
 md5 = T.pack . show . MD5.md5 . encodeUtf8 . fromStrict

@@ -11,8 +11,11 @@ import Data.Text (Text)
 import ShellCheck.Interface
     ( Code
     , Comment(..)
+    , newComment
     , Position(..)
+    , newPosition
     , PositionedComment(..)
+    , newPositionedComment
     , Severity(..)
     )
 import Test.Hspec
@@ -72,17 +75,25 @@ fingerprintSpecs = describe "issueFingerprint" $ do
 
 fingerprint :: Integer -> Code -> Text -> Text
 fingerprint ln code =
-  issueFingerprint $ PositionedComment (position ln) unused (comment code)
+  issueFingerprint $ newPositionedComment
+    { pcStartPos = position ln
+    , pcEndPos = unused
+    , pcComment = comment code
+    }
   where
     unused :: a
     unused = error "end position comment not implemented"
 
 position :: Integer -> Position
-position ln = Position
+position ln = newPosition
     { posFile = "foo.sh"
     , posLine = ln
     , posColumn = 0
     }
 
 comment :: Code -> Comment
-comment code = Comment ErrorC code ""
+comment code = newComment
+    { cSeverity = ErrorC
+    , cCode = code
+    , cMessage = ""
+    }

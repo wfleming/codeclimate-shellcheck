@@ -13,7 +13,6 @@ import           Control.Monad.Extra
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as Char8
 import           Data.List
-import           Data.Monoid
 import           Data.Shebang (Shebang(..), Interpretter(..), Argument(..))
 import qualified Data.Shebang as Shebang
 import           System.Directory
@@ -70,7 +69,7 @@ isShellScript path =
 -- | Retrieve shell scripts for a list of paths.
 findShellScripts :: [FilePath] -> IO [FilePath]
 findShellScripts paths = do
-  dotShFiles <- concat . fst <$> globDir patterns "."
+  dotShFiles <- concat <$> globDir patterns "."
   allScripts <- filterM validateScript $! dotShFiles ++ otherFiles
   return $ fmap clean allScripts
   where

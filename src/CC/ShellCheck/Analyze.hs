@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module CC.ShellCheck.Analyze where
 
@@ -8,7 +7,6 @@ import           CC.ShellCheck.Types as CC
 import           CC.Types as CC
 import           Control.Exception.Base
 import qualified Data.Map.Strict as DM
-import           Data.Monoid
 import qualified Data.Text as T
 import           ShellCheck.Checker
 import           ShellCheck.Interface
@@ -26,7 +24,11 @@ analyze env path = do
     checkSpec x = emptyCheckSpec { csFilename = path, csScript = x }
 
     interface :: SystemInterface IO
-    interface = SystemInterface { siReadFile = defaultInterface }
+    interface = SystemInterface
+        { siReadFile = defaultInterface
+        , siFindSource = error "TODO"
+        , siGetConfig = error "TODO"
+        }
 
 --------------------------------------------------------------------------------
 
@@ -60,13 +62,13 @@ fromSeverity WarningC = BugRisk
 
 -- | Maps CheckResult into issues.
 fromCheckResult :: Env -> CheckResult -> String -> [Issue]
-fromCheckResult env CheckResult{..} shellScript = fmap (fromPositionedComment env shellScript) crComments
+fromCheckResult env cr shellScript = fromPositionedComment env shellScript <$> crComments cr
 
 --------------------------------------------------------------------------------
 
 -- | Maps from a PositionedComment to an Issue.
 fromPositionedComment :: Env -> String -> PositionedComment -> Issue
-fromPositionedComment env shellScript p@(PositionedComment Position{..} _ (Comment severity code desc)) =
+fromPositionedComment env shellScript p =
   Issue { _check_name         = checkName
         , _description        = description
         , _categories         = categories
@@ -87,10 +89,10 @@ fromPositionedComment env shellScript p@(PositionedComment Position{..} _ (Comme
     categories = [fromSeverity severity]
 
     coords :: CC.Position
-    coords = Coords (LineColumn (fromIntegral posLine) (fromIntegral posColumn))
+    coords = Coords (LineColumn (fromIntegral $ posLine pos) (fromIntegral $ posColumn pos))
 
     location :: Location
-    location = Location posFile $! PositionBased coords coords
+    location = Location (posFile pos) $! PositionBased coords coords
 
     mapping :: Maybe Mapping
     mapping = DM.lookup checkName env
@@ -106,3 +108,9 @@ fromPositionedComment env shellScript p@(PositionedComment Position{..} _ (Comme
 
     content :: Maybe Content
     content = fmap (\(Mapping _ x) -> x) mapping
+
+    pos = pcStartPos p
+    comment = pcComment p
+    code = cCode comment
+    severity = cSeverity comment
+    desc = cMessage comment

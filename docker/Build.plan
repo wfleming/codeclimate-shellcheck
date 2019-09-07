@@ -1,4 +1,4 @@
-FROM fpco/stack-build:lts-3.18
+FROM fpco/stack-build:lts-14.1
 MAINTAINER Philip Cunningham <hello@filib.io>
 
 ADD . /home/app

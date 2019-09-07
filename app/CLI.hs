@@ -1,6 +1,5 @@
 module CLI where
 
-import Data.Monoid
 import Options.Applicative
 
 --------------------------------------------------------------------------------

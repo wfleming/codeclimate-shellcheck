@@ -39,7 +39,9 @@ old_env = YAML.load(File.read('env.yml'))
 
 # IO ()
 old_env.each do |key, val|
-  new_env[key]['remediation_points'] = val['remediation_points']
+  if (new_val = new_env[key])
+    new_val['remediation_points'] = val['remediation_points']
+  end
 end
 
 # String

@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module CC.ShellCheck.Env where
 
 import           CC.ShellCheck.Types
@@ -15,6 +13,6 @@ loadEnv :: FilePath -> IO Env
 loadEnv path = do
   fileExists <- doesFileExist path
   config <- if fileExists
-              then YML.decodeFile path
+              then either (const Nothing) Just <$> YML.decodeFileEither path
               else return Nothing
   return $! fromMaybe DM.empty config

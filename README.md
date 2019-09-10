@@ -1,3 +1,9 @@
+# New Maintainer Needed
+
+Please see https://github.com/mcfilib/codeclimate-shellcheck/issues/66 for more information.
+
+<hr/>
+
 # Code Climate ShellCheck Engine
 
 [![Code Climate](https://codeclimate.com/github/filib/codeclimate-shellcheck/badges/gpa.svg)](https://codeclimate.com/github/filib/codeclimate-shellcheck)
